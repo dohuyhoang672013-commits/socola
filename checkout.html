@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh Toán & Xác Nhận Đặt Hàng - ChocoRank</title>
+  <meta name="description" content="Trang thanh toán và xác nhận đơn hàng socola và kẹo thượng hạng ChocoRank. Đóng gói bảo quản lạnh chuyên nghiệp tiêu chuẩn 16°C - 20°C.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍫</text></svg>">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* =========================================================================
+       LUXURY CHECKOUT STYLING
+       ========================================================================= */
+    body.checkout-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at 50% 0%, rgba(58, 32, 18, 0.4) 0%, rgba(12, 8, 6, 0.98) 75%),
+                  url('assets/images/hero.jpg') center/cover no-repeat;
+      background-attachment: fixed;
+    }
+
+    .checkout-header {
+      background: rgba(18, 12, 9, 0.85);
+      border-bottom: 1px solid var(--bg-glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .checkout-nav-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .checkout-container {
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+      flex: 1;
+    }
+
+    /* Stepper Header */
+    .checkout-stepper-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .step-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: var(--transition);
+    }
+
+    .step-node.completed {
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .step-node.active {
+      color: var(--gold-light);
+      border-color: var(--gold-primary);
+      background: rgba(212, 175, 55, 0.15);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .step-divider {
+      width: 28px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Layout Grid */
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panels */
+    .checkout-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-glass-border);
+      border-radius: var(--radius-lg);
+      padding: 30px 28px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-md), 0 0 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .checkout-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .checkout-card-title {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-autofill-demo {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px dashed var(--gold-primary);
+      color: var(--gold-light);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-autofill-demo:hover {
+      background: rgba(212, 175, 55, 0.25);
+      transform: translateY(-1px);
+    }
+
+    /* Form Fields */
+    .form-group-custom {
+      margin-bottom: 18px;
+    }
+
+    .form-label-custom {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .input-icon-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix-icon {
+      position: absolute;
+      left: 14px;
+      font-size: 1rem;
+      color: var(--gold-light);
+      pointer-events: none;
+    }
+
+    .checkout-input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .checkout-input:focus {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .checkout-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      outline: none;
+      resize: vertical;
+      min-height: 75px;
+      transition: var(--transition);
+    }
+
+    .checkout-textarea:focus {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Packaging Options */
+    .packaging-options-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 22px;
+    }
+
+    .package-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .package-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .package-item input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: var(--gold-primary);
+    }
+
+    /* Payment Methods Grid */
+    .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .payment-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pay-card {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      background: var(--bg-surface);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+
+    .pay-card:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .pay-card.active {
+      border-color: var(--gold-primary);
+      background: rgba(212, 175, 55, 0.12);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .pay-card-icon {
+      font-size: 1.8rem;
+    }
+
+    .pay-card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .pay-card-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Interactive QR & Card Mockups */
+    .payment-interactive-area {
+      background: var(--bg-surface);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 24px;
+      animation: fadeInForm 0.3s ease;
+    }
+
+    .qr-box-layout {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .qr-code-graphic {
+      width: 140px;
+      height: 140px;
+      background: #ffffff;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--gold-primary);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .qr-info-content {
+      flex: 1;
+      min-width: 220px;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .qr-info-content strong {
+      color: var(--gold-light);
+    }
+
+    /* Card Mockup Inputs */
+    .card-inputs-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .card-inputs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Summary Side */
+    .cart-item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 6px;
+      margin-bottom: 20px;
+    }
+
+    .cart-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      transition: var(--transition);
+    }
+
+    .cart-item-row:hover {
+      border-color: rgba(212, 175, 55, 0.3);
+    }
+
+    .cart-item-img {
+      width: 54px;
+      height: 54px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      flex-shrink: 0;
+    }
+
+    .cart-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cart-item-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .cart-item-brand {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .cart-qty-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-qty {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .btn-qty:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+    }
+
+    .qty-number {
+      font-size: 0.85rem;
+      font-weight: 800;
+      min-width: 18px;
+      text-align: center;
+      color: var(--gold-light);
+    }
+
+    .cart-item-price-col {
+      text-align: right;
+    }
+
+    .cart-item-total-price {
+      font-weight: 800;
+      font-size: 0.94rem;
+      color: var(--gold-light);
+    }
+
+    .btn-delete-cart-item {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      margin-top: 4px;
+      padding: 2px;
+      transition: var(--transition);
+    }
+
+    .btn-delete-cart-item:hover {
+      color: #ef4444;
+    }
+
+    /* Voucher Area */
+    .voucher-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 20px;
+    }
+
+    .voucher-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-apply-voucher {
+      padding: 8px 16px;
+      background: var(--gold-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #0c0806;
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-apply-voucher:hover {
+      background: #f5e6a8;
+    }
+
+    .voucher-chips-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .voucher-chip {
+      font-size: 0.74rem;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px dashed rgba(212, 175, 55, 0.35);
+      color: var(--gold-light);
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .voucher-chip:hover {
+      background: rgba(212, 175, 55, 0.25);
+    }
+
+    /* Breakdown calculations */
+    .summary-calc-box {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.88rem;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .calc-row.discount-row {
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .calc-row.total-row {
+      border-top: 1px dashed rgba(212, 175, 55, 0.35);
+      padding-top: 14px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .calc-row.total-row .total-amount {
+      color: var(--gold-light);
+      font-size: 1.45rem;
+      font-weight: 900;
+    }
+
+    .btn-submit-order {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--gold-primary), #b38f28);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #0c0806;
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 22px;
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
+    }
+
+    .btn-submit-order:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(212, 175, 55, 0.5);
+      background: linear-gradient(135deg, #fceaa7, var(--gold-primary));
+    }
+
+    /* Quick Product Suggestions for Empty Cart */
+    .quick-products-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .quick-prod-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+    }
+
+    .quick-prod-card:hover {
+      border-color: var(--gold-primary);
+      background: rgba(212, 175, 55, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .quick-prod-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .quick-prod-info h5 {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 140px;
+    }
+
+    .quick-prod-info span {
+      font-size: 0.72rem;
+      color: var(--gold-light);
+      font-weight: 700;
+    }
+
+    /* Order Success Celebration Overlay */
+    .order-success-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(12, 8, 6, 0.94);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeInOverlay 0.3s ease;
+    }
+
+    .order-success-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .order-success-card {
+      background: var(--bg-card);
+      border: 1px solid var(--gold-primary);
+      border-radius: var(--radius-lg);
+      padding: 36px 30px;
+      max-width: 560px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(212, 175, 55, 0.35);
+      animation: scaleUpCard 0.35s ease;
+    }
+
+    @keyframes scaleUpCard {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .ticket-details-box {
+      background: var(--bg-surface);
+      border: 1px dashed rgba(212, 175, 55, 0.35);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: left;
+      font-size: 0.86rem;
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body class="checkout-page">
+
+  <!-- ========================================================================
+       CHECKOUT HEADER
+       ======================================================================== -->
+  <header class="checkout-header">
+    <div class="checkout-nav-wrap">
+      <a href="index.html" class="logo" style="text-decoration: none;">
+        <div class="logo-icon">🍫</div>
+        <div class="logo-text">
+          <span class="logo-title">Choco<span class="text-gold">Rank</span></span>
+          <span class="logo-subtitle">Xác Nhận Đơn Hàng & Thanh Toán</span>
+        </div>
+      </a>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="auth-user-profile" id="checkoutUserPill" style="display: none;">
+          <span class="user-avatar-badge" id="checkoutUserAvatar">🍫</span>
+          <span class="user-name-text" id="checkoutUserName">Khách hàng</span>
+        </div>
+
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Chuyển đổi giao diện Sáng / Tối">
+          🌙
+        </button>
+
+        <a href="index.html#rankings" class="btn-view-client" title="Quay lại danh sách sản phẩm">
+          <span>← Tiếp Tục Chọn Món</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN CHECKOUT CONTAINER
+       ======================================================================== -->
+  <main class="checkout-container">
+    
+    <!-- 3-Step Progress Stepper -->
+    <div class="checkout-stepper-wrap">
+      <div class="step-node completed">
+        <span>✓</span>
+        <span>1. Chọn Món Thượng Hạng</span>
+      </div>
+      <div class="step-divider"></div>
+      <div class="step-node active">
+        <span>📦</span>
+        <span>2. Thông Tin Giao Hàng & Bảo Quản</span>
+      </div>
+      <div class="step-divider"></div>
+      <div class="step-node">
+        <span>💳</span>
+        <span>3. Thanh Toán & Nhận Hàng</span>
+      </div>
+    </div>
+
+    <!-- Main Grid: Left (Form) - Right (Summary) -->
+    <div class="checkout-grid">
+      
+      <!-- LEFT COLUMN: CUSTOMER DELIVERY FORM -->
+      <section class="checkout-card">
+        <div class="checkout-card-header">
+          <h2 class="checkout-card-title">
+            <span>📦 Thông Tin Giao Hàng & Người Nhận</span>
+          </h2>
+          <button type="button" class="btn-autofill-demo" id="autoFillDemoBtn" title="Tự động điền nhanh dữ liệu mẫu để thử nghiệm">
+            <span>⚡ Điền Nhanh Thông Tin Mẫu</span>
+          </button>
+        </div>
+
+        <form id="checkoutForm" autocomplete="on">
+          
+          <!-- Row 1: Name & Phone -->
+          <div class="form-grid-2">
+            <div class="form-group-custom">
+              <label class="form-label-custom" for="custName">
+                <span>Họ và tên người nhận *</span>
+              </label>
+              <div class="input-icon-wrap">
+                <span class="input-prefix-icon">👤</span>
+                <input type="text" id="custName" class="checkout-input" placeholder="Ví dụ: Nguyễn Văn Khách" required autofocus>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <label class="form-label-custom" for="custPhone" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Số điện thoại liên hệ</span>
+                <span style="font-size: 0.72rem; color: #a3e635; font-weight: normal; background: rgba(163, 230, 53, 0.1); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(163, 230, 53, 0.25);">✓ Chấp nhận số giả lập (0123, 123...)</span>
+              </label>
+              <div class="input-icon-wrap">
+                <span class="input-prefix-icon">📞</span>
+                <input type="text" id="custPhone" class="checkout-input" placeholder="Nhập số thật hoặc số giả bất kỳ (VD: 0123, 123456, 0988...)" title="Có thể nhập bất kỳ số nào, kể cả số giả để thử nghiệm">
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Email & Province -->
+          <div class="form-grid-2">
+            <div class="form-group-custom">
+              <label class="form-label-custom" for="custEmail">
+                <span>Địa chỉ Email nhận mã đơn & hóa đơn *</span>
+              </label>
+              <div class="input-icon-wrap">
+                <span class="input-prefix-icon">✉️</span>
+                <input type="email" id="custEmail" class="checkout-input" placeholder="email@domain.com" required>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <label class="form-label-custom" for="custCity">
+                <span>Tỉnh / Thành phố *</span>
+              </label>
+              <div class="input-icon-wrap">
+                <span class="input-prefix-icon">🏙️</span>
+                <select id="custCity" class="checkout-input select-control" style="padding-left: 42px;" required>
+                  <option value="Hà Nội">Hà Nội (Hỏa Tốc 1-2 Giờ)</option>
+                  <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh (Hỏa Tốc 1-2 Giờ)</option>
+                  <option value="Đà Nẵng">Đà Nẵng</option>
+                  <option value="Hải Phòng">Hải Phòng</option>
+                  <option value="Cần Thơ">Cần Thơ</option>
+                  <option value="Bình Dương">Bình Dương</option>
+                  <option value="Đồng Nai">Đồng Nai</option>
+                  <option value="Khác">Tỉnh / Thành phố khác</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: Street Address -->
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="custAddress">
+              <span>Địa chỉ nhận hàng chi tiết *</span>
+            </label>
+            <div class="input-icon-wrap">
+              <span class="input-prefix-icon" style="top: 14px;">🏠</span>
+              <textarea id="custAddress" class="checkout-textarea" style="padding-left: 42px;" placeholder="Số nhà, tên đường, ngõ ngách, phường/xã, quận/huyện..." required></textarea>
+            </div>
+          </div>
+
+          <!-- Row 4: Shipping Note -->
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="custNote">
+              <span>Ghi chú vận chuyển & bảo quản lạnh (Tùy chọn)</span>
+            </label>
+            <div class="input-icon-wrap">
+              <span class="input-prefix-icon">📝</span>
+              <input type="text" id="custNote" class="checkout-input" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến 15 phút...">
+            </div>
+          </div>
+
+          <!-- Quality Packaging Options -->
+          <div class="packaging-options-box">
+            <div style="color: var(--gold-light); font-weight: 700; font-size: 0.85rem; margin-bottom: 8px;">
+              ❄️ Tiêu Chuẩn Bảo Quản Nhiệt Độ & Đóng Gói Cao Cấp:
+            </div>
+            <label class="package-item">
+              <input type="checkbox" id="chkIceGel" checked disabled>
+              <span><strong>Đóng gói thùng xốp cách nhiệt + 2 túi đá gel sinh học</strong>: Cam kết nhiệt độ 16°C – 20°C suốt hành trình, chống mềm chảy 100% (Miễn phí).</span>
+            </label>
+            <label class="package-item">
+              <input type="checkbox" id="chkGiftRibbon" checked>
+              <span><strong>Kèm túi giấy quà tặng cao cấp & thiệp chúc mừng</strong>: Thích hợp làm quà tặng bạn bè, người thân hoặc đối tác (+0₫).</span>
+            </label>
+          </div>
+
+          <!-- Payment Methods Section -->
+          <div class="form-group-custom">
+            <label class="form-label-custom">
+              <span>Chọn Phương Thức Thanh Toán</span>
+              <span style="font-size: 0.74rem; color: var(--gold-light);">An toàn & bảo mật 100%</span>
+            </label>
+
+            <div class="payment-grid">
+              <div class="pay-card active" data-method="cod" id="payMethodCod">
+                <span class="pay-card-icon">💵</span>
+                <span class="pay-card-title">Tiền Mặt (COD)</span>
+                <span class="pay-card-desc">Kiểm tra độ lạnh thùng xốp rồi thanh toán</span>
+              </div>
+
+              <div class="pay-card" data-method="qr" id="payMethodQr">
+                <span class="pay-card-icon">📱</span>
+                <span class="pay-card-title">Quét Mã QR</span>
+                <span class="pay-card-desc">VietQR / MoMo / VNPay siêu tốc</span>
+              </div>
+
+              <div class="pay-card" data-method="card" id="payMethodCard">
+                <span class="pay-card-icon">💳</span>
+                <span class="pay-card-title">Thẻ Quốc Tế / ATM</span>
+                <span class="pay-card-desc">Visa, Mastercard, JCB nội địa</span>
+              </div>
+            </div>
+
+            <!-- Interactive Area 1: QR Payment (Active when QR selected) -->
+            <div class="payment-interactive-area" id="qrPaymentArea" style="display: none;">
+              <div class="qr-box-layout">
+                <div class="qr-code-graphic">
+                  <div style="font-size: 0.72rem; font-weight: 800; color: #1e3a8a; margin-bottom: 2px;">VIETQR • NAPAS247</div>
+                  <div style="width: 105px; height: 105px; background: url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ChocoRank_Order_Payment') center/cover no-repeat; border-radius: 4px;"></div>
+                  <div style="font-size: 0.65rem; color: #b45309; margin-top: 2px; font-weight: 700;">QUÉT MÃ ĐỂ TRẢ</div>
+                </div>
+                <div class="qr-info-content">
+                  <h4 style="margin: 0 0 6px 0; color: var(--text-main); font-size: 0.95rem;">📱 Quét Mã Thanh Toán QR Tự Động</h4>
+                  <div>Ngân Hàng: <strong>Techcombank (Ngân hàng Kỹ Thương)</strong></div>
+                  <div>Số Tài Khoản: <strong>1903 6888 666 999</strong></div>
+                  <div>Chủ Tài Khoản: <strong>CONG TY TNHH CHOCO RANK VIETNAM</strong></div>
+                  <div>Số Tiền: <strong id="qrAmountDisplay" style="color: var(--gold-light); font-size: 1.05rem;">0₫</strong></div>
+                  <div>Nội Dung CK: <strong id="qrContentDisplay" style="color: #34d399;">CR_DONHANG_DEMO</strong></div>
+                  <small style="color: var(--text-muted); font-size: 0.74rem; display: block; margin-top: 4px;">* Hệ thống tự động xác nhận đơn ngay sau khi nhận giao dịch.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Area 2: Card Mockup (Active when Card selected) -->
+            <div class="payment-interactive-area" id="cardPaymentArea" style="display: none;">
+              <h4 style="margin: 0 0 10px 0; color: var(--gold-light); font-size: 0.92rem;">💳 Thông Tin Thẻ Thanh Toán Quốc Tế / Nội Địa</h4>
+              <div class="card-inputs-grid">
+                <div>
+                  <label style="font-size: 0.76rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Số thẻ (16 chữ số):</label>
+                  <input type="text" class="checkout-input" id="cardNumInput" placeholder="4123 4567 8901 2345" maxlength="19">
+                </div>
+                <div>
+                  <label style="font-size: 0.76rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Hạn dùng (MM/YY):</label>
+                  <input type="text" class="checkout-input" id="cardExpInput" placeholder="12/28" maxlength="5">
+                </div>
+                <div>
+                  <label style="font-size: 0.76rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Mã bảo mật CVV:</label>
+                  <input type="password" class="checkout-input" id="cardCvvInput" placeholder="•••" maxlength="3">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Order Button -->
+          <button type="submit" class="btn-submit-order" id="submitOrderBtn">
+            <span>🛒 XÁC NHẬN ĐẶT HÀNG NGAY</span>
+            <span>→</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- RIGHT COLUMN: ORDER SUMMARY & VOUCHERS -->
+      <section class="checkout-card" style="position: sticky; top: 90px;">
+        <div class="checkout-card-header">
+          <h2 class="checkout-card-title">
+            <span>🛍️ Giỏ Hàng & Tóm Tắt Đơn</span>
+          </h2>
+          <span id="orderSummaryItemCount" style="font-size: 0.88rem; color: var(--gold-light); font-weight: 800; background: rgba(212,175,55,0.15); padding: 3px 10px; border-radius: var(--radius-full);">0 món</span>
+        </div>
+
+        <!-- Items Container -->
+        <div class="cart-item-list" id="cartItemsContainer">
+          <!-- Rendered dynamically by js -->
+        </div>
+
+        <!-- Empty Cart Quick Bestseller Selector -->
+        <div id="emptyCartSuggestionsBox" style="display: none; background: rgba(212, 175, 55, 0.05); border: 1px dashed rgba(212, 175, 55, 0.3); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 20px;">
+          <div style="color: var(--gold-light); font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">
+            ✨ Giỏ hàng trống? Bấm thêm nhanh 1 trong các món hot nhất:
+          </div>
+          <div class="quick-products-grid">
+            <div class="quick-prod-card" onclick="quickAddSuggest('marou-daklak-70')">
+              <img src="assets/images/marou_daklak.jpg" alt="Marou" class="quick-prod-img">
+              <div class="quick-prod-info">
+                <h5>Marou Đắk Lắk 70%</h5>
+                <span>135.000₫ <strong>+</strong></span>
+              </div>
+            </div>
+
+            <div class="quick-prod-card" onclick="quickAddSuggest('haribo-goldbears')">
+              <img src="assets/images/haribo_gummy.jpg" alt="Haribo" class="quick-prod-img">
+              <div class="quick-prod-info">
+                <h5>Kẹo Gấu Haribo</h5>
+                <span>38.000₫ <strong>+</strong></span>
+              </div>
+            </div>
+
+            <div class="quick-prod-card" onclick="quickAddSuggest('royce-nama-matcha')">
+              <img src="assets/images/royce_nama.jpg" alt="Royce" class="quick-prod-img">
+              <div class="quick-prod-info">
+                <h5>Royce' Nama Matcha</h5>
+                <span>260.000₫ <strong>+</strong></span>
+              </div>
+            </div>
+
+            <div class="quick-prod-card" onclick="quickAddSuggest('keo-dua-sap-bentre')">
+              <img src="assets/images/keo_dua.jpg" alt="Kẹo Dừa" class="quick-prod-img">
+              <div class="quick-prod-info">
+                <h5>Kẹo Dừa Bến Tre</h5>
+                <span>65.000₫ <strong>+</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Voucher Code Section -->
+        <div class="voucher-box">
+          <label style="font-size: 0.78rem; font-weight: 700; color: var(--gold-light); display: block; margin-bottom: 6px;">
+            🏷️ Nhập Mã Ưu Đãi / Voucher:
+          </label>
+          <div class="voucher-input-group">
+            <input type="text" id="voucherCodeInput" class="checkout-input" style="text-transform: uppercase;" placeholder="Nhập mã (VD: CHOCOVIP)">
+            <button type="button" class="btn-apply-voucher" id="btnApplyVoucher">Áp Dụng</button>
+          </div>
+          <div class="voucher-chips-row">
+            <span class="voucher-chip" onclick="applyCouponCode('CHOCOVIP')">🏷️ CHOCOVIP (-10%)</span>
+            <span class="voucher-chip" onclick="applyCouponCode('FREESHIP')">🚚 FREESHIP (-30K)</span>
+            <span class="voucher-chip" onclick="applyCouponCode('SWEET2026')">✨ SWEET2026 (-15%)</span>
+          </div>
+        </div>
+
+        <!-- Calculation Box -->
+        <div class="summary-calc-box" id="summaryCalcBox">
+          <div class="calc-row">
+            <span>Tạm tính tiền hàng:</span>
+            <span id="subtotalDisplay">0₫</span>
+          </div>
+
+          <div class="calc-row discount-row" id="discountRow" style="display: none;">
+            <span id="discountLabel">⭐ Ưu đãi thành viên VIP (10%):</span>
+            <span id="discountDisplay">- 0₫</span>
+          </div>
+
+          <div class="calc-row">
+            <span>Đóng gói thùng xốp đá gel lạnh:</span>
+            <span style="color: #34d399; font-weight: 700;">Miễn phí (0₫)</span>
+          </div>
+
+          <div class="calc-row">
+            <span>Phí giao hỏa tốc tận nơi:</span>
+            <span style="color: #34d399; font-weight: 700;">Miễn phí (0₫)</span>
+          </div>
+
+          <div class="calc-row total-row">
+            <span>Tổng thanh toán:</span>
+            <span class="total-amount" id="grandTotalDisplay">0₫</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL: ORDER SUCCESS CELEBRATION
+       ======================================================================== -->
+  <div class="order-success-overlay" id="orderSuccessModal">
+    <div class="order-success-card">
+      <div style="font-size: 3.8rem; margin-bottom: 8px; filter: drop-shadow(0 6px 14px rgba(212, 175, 55, 0.4));">
+        🎉🍫✨
+      </div>
+
+      <span class="section-badge" style="background: rgba(16, 185, 129, 0.18); color: #34d399; margin-bottom: 10px;">
+        ✅ ĐẶT HÀNG THÀNH CÔNG
+      </span>
+
+      <h2 style="font-family: var(--font-serif); font-size: 1.85rem; margin: 8px 0 4px 0; color: var(--text-main);">
+        Cảm Ơn Bạn Đã Đặt Mua!
+      </h2>
+
+      <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin: 0 0 16px 0;">
+        Đơn hàng socola & kẹo của bạn đã được lưu vào hệ thống ChocoRank và giỏ hàng đã được làm trống an toàn.
+      </p>
+
+      <!-- Details Ticket Box -->
+      <div class="ticket-details-box">
+        <div class="ticket-row" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px;">
+          <span style="color: var(--text-muted);">Mã đơn hàng:</span>
+          <strong style="color: var(--gold-light); font-family: monospace; font-size: 1.05rem;" id="successOrderId">#CR-89241</strong>
+        </div>
+
+        <div class="ticket-row">
+          <span style="color: var(--text-muted);">Người nhận:</span>
+          <strong id="successCustName" style="color: var(--text-main);">Nguyễn Văn Khách</strong>
+        </div>
+
+        <div class="ticket-row">
+          <span style="color: var(--text-muted);">Số điện thoại:</span>
+          <span id="successCustPhone" style="color: var(--text-main);">0988686868</span>
+        </div>
+
+        <div class="ticket-row">
+          <span style="color: var(--text-muted);">Địa chỉ giao:</span>
+          <span id="successCustAddress" style="max-width: 260px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main);">Hà Nội</span>
+        </div>
+
+        <div class="ticket-row" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px;">
+          <span style="color: var(--text-muted);">Phương thức:</span>
+          <span id="successPayMethod" style="color: var(--gold-light); font-weight: 700;">COD (Tiền mặt khi nhận)</span>
+        </div>
+
+        <div class="ticket-row">
+          <span style="color: var(--text-muted);">Dự kiến giao:</span>
+          <span style="color: #34d399; font-weight: 700;">Trong 1 - 2 giờ tới (Đá Gel Lạnh)</span>
+        </div>
+
+        <div class="ticket-row" style="font-size: 1.05rem; font-weight: 800; border-top: 1px dashed rgba(212,175,55,0.3); padding-top: 8px;">
+          <span>Tổng số tiền:</span>
+          <span style="color: var(--gold-light); font-size: 1.2rem;" id="successGrandTotal">0₫</span>
+        </div>
+      </div>
+
+      <div style="background: rgba(212, 175, 55, 0.08); border-radius: var(--radius-sm); padding: 10px; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">
+        💡 <strong>Mẹo bảo quản:</strong> Sau khi nhận hàng, vui lòng để nguyên hộp vào ngăn mát tủ lạnh (16°C – 20°C) 15 phút trước khi thưởng thức để socola đạt độ giòn tan chuẩn vị nhất.
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <a href="index.html" class="btn-primary" style="justify-content: center; text-decoration: none; padding: 12px 24px; font-size: 0.92rem;">
+          <span>← Tiếp Tục Mua Sắm</span>
+        </a>
+        <a href="admin.html" class="btn-view-client" style="justify-content: center; text-decoration: none; padding: 12px 20px; font-size: 0.92rem;">
+          <span>📋 Xem Đơn Trong Khu Quản Trị</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    // State
+    let activePaymentMethod = 'cod';
+    let appliedCoupon = null; // { code, discountRate, fixedDiscount }
+
+    // Format currency VND
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('vi-VN').format(amount) + '₫';
+    }
+
+    // Toast helper
+    function showToast(msg, type = 'success') {
+      const cont = document.getElementById('toastContainer');
+      if (!cont) return;
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✓' : (type === 'warning' ? '⚠️' : 'ℹ️')} ${msg}</span>`;
+      cont.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
+    }
+
+    // Check user & prefill
+    function initUserInfo() {
+      const currentUser = getCurrentUser();
+      const userPill = document.getElementById('checkoutUserPill');
+      const userName = document.getElementById('checkoutUserName');
+      const userAvatar = document.getElementById('checkoutUserAvatar');
+
+      if (currentUser) {
+        userPill.style.display = 'inline-flex';
+        userName.textContent = currentUser.name;
+        userAvatar.textContent = currentUser.avatar || '🍫';
+
+        // Prefill form
+        const nameInput = document.getElementById('custName');
+        const emailInput = document.getElementById('custEmail');
+        if (nameInput && !nameInput.value) nameInput.value = currentUser.name;
+        if (emailInput && !emailInput.value) emailInput.value = currentUser.email;
+      }
+    }
+
+    // Autofill Demo Data
+    document.getElementById('autoFillDemoBtn')?.addEventListener('click', () => {
+      document.getElementById('custName').value = 'Nguyễn Văn Khách';
+      document.getElementById('custPhone').value = '0988686868';
+      document.getElementById('custEmail').value = 'khach@chocorank.com';
+      document.getElementById('custCity').value = 'Hà Nội';
+      document.getElementById('custAddress').value = 'Tầng 6, Toà Nhà Tràng Tiền Plaza, 24 Hai Bà Trưng, P. Tràng Tiền, Q. Hoàn Kiếm';
+      document.getElementById('custNote').value = 'Giao hỏa tốc thùng xốp đá gel, gọi trước khi giao 15 phút';
+      showToast('Đã điền nhanh thông tin giao hàng mẫu thành công!', 'success');
+    });
+
+    // Render Order Summary & Cart Items
+    function renderOrderSummary() {
+      const summary = getCartSummary();
+      const container = document.getElementById('cartItemsContainer');
+      const countDisplay = document.getElementById('orderSummaryItemCount');
+      const subtotalDisplay = document.getElementById('subtotalDisplay');
+      const discountRow = document.getElementById('discountRow');
+      const discountLabel = document.getElementById('discountLabel');
+      const discountDisplay = document.getElementById('discountDisplay');
+      const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+      const submitBtn = document.getElementById('submitOrderBtn');
+      const emptySuggestionsBox = document.getElementById('emptyCartSuggestionsBox');
+      const qrAmountDisplay = document.getElementById('qrAmountDisplay');
+
+      countDisplay.textContent = `${summary.itemCount} món`;
+
+      if (summary.items.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 24px 12px; color: var(--text-muted);">
+            <div style="font-size: 2.5rem; margin-bottom: 6px;">🛒</div>
+            <h4 style="margin: 0 0 4px 0; color: var(--text-main); font-size: 1rem;">Giỏ hàng của bạn đang trống</h4>
+            <p style="font-size: 0.8rem; margin: 0;">Hãy chọn nhanh một sản phẩm bên dưới để trải nghiệm đặt hàng:</p>
+          </div>
+        `;
+        if (emptySuggestionsBox) emptySuggestionsBox.style.display = 'block';
+
+        subtotalDisplay.textContent = '0₫';
+        discountRow.style.display = 'none';
+        grandTotalDisplay.textContent = '0₫';
+        if (qrAmountDisplay) qrAmountDisplay.textContent = '0₫';
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        submitBtn.style.cursor = 'not-allowed';
+        return;
+      }
+
+      if (emptySuggestionsBox) emptySuggestionsBox.style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.style.cursor = 'pointer';
+
+      // Render items
+      container.innerHTML = summary.items.map(item => {
+        const itemLineTotal = item.price * item.quantity;
+        return `
+          <div class="cart-item-row" id="cart-row-${item.id}">
+            <img src="${item.image}" alt="${item.name}" class="cart-item-img">
+            <div class="cart-item-info">
+              <div class="cart-item-title" title="${item.name}">${item.name}</div>
+              <div class="cart-item-brand">${item.brand} • ${formatCurrency(item.price)}</div>
+              <div class="cart-qty-control">
+                <button type="button" class="btn-qty" onclick="changeQty('${item.id}', ${item.quantity - 1})" title="Giảm số lượng">-</button>
+                <span class="qty-number">${item.quantity}</span>
+                <button type="button" class="btn-qty" onclick="changeQty('${item.id}', ${item.quantity + 1})" title="Tăng số lượng">+</button>
+              </div>
+            </div>
+            <div class="cart-item-price-col">
+              <div class="cart-item-total-price">${formatCurrency(itemLineTotal)}</div>
+              <button type="button" class="btn-delete-cart-item" onclick="deleteCartItem('${item.id}')" title="Xóa món">✕ Xóa</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Calculation breakdown with coupon support
+      let subtotal = summary.subtotal;
+      let totalDiscount = summary.discountAmount;
+      let discountTitle = '⭐ Ưu đãi thành viên VIP (10%):';
+
+      if (appliedCoupon) {
+        if (appliedCoupon.discountRate) {
+          const couponDiscount = Math.round(subtotal * appliedCoupon.discountRate);
+          totalDiscount = Math.max(totalDiscount, couponDiscount);
+          discountTitle = `🏷️ Mã ${appliedCoupon.code} (-${appliedCoupon.discountRate * 100}%):`;
+        } else if (appliedCoupon.fixedDiscount) {
+          totalDiscount = Math.min(subtotal, totalDiscount + appliedCoupon.fixedDiscount);
+          discountTitle = `🏷️ Mã ${appliedCoupon.code} (-${formatCurrency(appliedCoupon.fixedDiscount)}):`;
+        }
+      }
+
+      const finalGrandTotal = Math.max(0, subtotal - totalDiscount);
+
+      subtotalDisplay.textContent = formatCurrency(subtotal);
+
+      if (totalDiscount > 0) {
+        discountRow.style.display = 'flex';
+        discountLabel.textContent = discountTitle;
+        discountDisplay.textContent = `- ${formatCurrency(totalDiscount)}`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+
+      grandTotalDisplay.textContent = formatCurrency(finalGrandTotal);
+      if (qrAmountDisplay) qrAmountDisplay.textContent = formatCurrency(finalGrandTotal);
+    }
+
+    // Quick add suggested bestseller into cart
+    window.quickAddSuggest = function(productId) {
+      addToCart(productId, 1, false, true);
+      renderOrderSummary();
+      showToast('Đã thêm sản phẩm vào giỏ hàng thành công! 🛒', 'success');
+    };
+
+    // Change item quantity
+    window.changeQty = function(id, newQty) {
+      if (newQty <= 0) {
+        deleteCartItem(id);
+      } else {
+        updateCartQuantity(id, newQty);
+        renderOrderSummary();
+      }
+    };
+
+    // Delete item
+    window.deleteCartItem = function(id) {
+      removeFromCart(id);
+      renderOrderSummary();
+      showToast('Đã xóa món khỏi giỏ hàng.', 'info');
+    };
+
+    // Apply Coupon Code
+    window.applyCouponCode = function(code) {
+      const cleanCode = (code || '').trim().toUpperCase();
+      if (cleanCode === 'CHOCOVIP') {
+        appliedCoupon = { code: 'CHOCOVIP', discountRate: 0.10 };
+        showToast('Áp dụng mã CHOCOVIP: Giảm ngay 10% tổng đơn!', 'success');
+      } else if (cleanCode === 'FREESHIP') {
+        appliedCoupon = { code: 'FREESHIP', fixedDiscount: 30000 };
+        showToast('Áp dụng mã FREESHIP: Giảm 30.000₫ phí giao hàng!', 'success');
+      } else if (cleanCode === 'SWEET2026') {
+        appliedCoupon = { code: 'SWEET2026', discountRate: 0.15 };
+        showToast('Áp dụng mã SWEET2026: Giảm ngay 15% tổng đơn!', 'success');
+      } else {
+        showToast('Mã voucher không hợp lệ hoặc đã hết hạn!', 'warning');
+        return;
+      }
+      document.getElementById('voucherCodeInput').value = cleanCode;
+      renderOrderSummary();
+    };
+
+    document.getElementById('btnApplyVoucher')?.addEventListener('click', () => {
+      const input = document.getElementById('voucherCodeInput');
+      applyCouponCode(input ? input.value : '');
+    });
+
+    // Payment method selector
+    document.querySelectorAll('.pay-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        activePaymentMethod = card.dataset.method;
+
+        const qrArea = document.getElementById('qrPaymentArea');
+        const cardArea = document.getElementById('cardPaymentArea');
+
+        if (activePaymentMethod === 'qr') {
+          qrArea.style.display = 'block';
+          cardArea.style.display = 'none';
+        } else if (activePaymentMethod === 'card') {
+          qrArea.style.display = 'none';
+          cardArea.style.display = 'block';
+        } else {
+          qrArea.style.display = 'none';
+          cardArea.style.display = 'none';
+        }
+      });
+    });
+
+    // Theme toggle
+    const themeBtn = document.getElementById('themeToggleBtn');
+    themeBtn?.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      themeBtn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+    });
+
+    // Handle Order Submission
+    document.getElementById('checkoutForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const summary = getCartSummary();
+      if (summary.items.length === 0) {
+        showToast('Giỏ hàng của bạn đang trống! Vui lòng chọn ít nhất 1 món để đặt hàng.', 'warning');
+        return;
+      }
+
+      const name = document.getElementById('custName').value.trim() || 'Khách Hàng Quý';
+      const phone = document.getElementById('custPhone').value.trim() || '0123456789 (Số giả lập)';
+      const email = document.getElementById('custEmail').value.trim();
+      const city = document.getElementById('custCity').value;
+      const address = document.getElementById('custAddress').value.trim();
+      const note = document.getElementById('custNote').value.trim();
+      const fullAddress = `${address}, ${city}`;
+
+      // Generate random order ID
+      const orderId = '#CR-' + Math.floor(10000 + Math.random() * 90000);
+
+      let payMethodText = 'COD (Tiền mặt khi nhận)';
+      if (activePaymentMethod === 'qr') payMethodText = 'Quét mã QR (VietQR / MoMo)';
+      if (activePaymentMethod === 'card') payMethodText = 'Thẻ tín dụng / Ghi nợ quốc tế';
+
+      // Save order record
+      const orderRecord = {
+        orderId: orderId,
+        date: new Date().toLocaleString('vi-VN'),
+        customer: { name, phone, email, address: fullAddress, note },
+        paymentMethod: payMethodText,
+        items: summary.items,
+        subtotal: summary.subtotal,
+        discount: summary.discountAmount,
+        grandTotal: summary.grandTotal,
+        status: 'Chờ giao hàng'
+      };
+
+      saveOrder(orderRecord);
+
+      // Clear cart
+      clearCart();
+
+      // Show details on success modal
+      document.getElementById('successOrderId').textContent = orderId;
+      document.getElementById('successCustName').textContent = name;
+      document.getElementById('successCustPhone').textContent = phone;
+      document.getElementById('successCustAddress').textContent = fullAddress;
+      document.getElementById('successPayMethod').textContent = payMethodText;
+      document.getElementById('successGrandTotal').textContent = formatCurrency(summary.grandTotal);
+
+      // Open celebration modal
+      document.getElementById('orderSuccessModal').classList.add('active');
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initUserInfo();
+
+      // If cart is empty on first load, add 1 bestselling item as demo recommendation so user can immediately test
+      const currentCart = getCart();
+      if (currentCart.length === 0) {
+        addToCart('marou-daklak-70', 1, false, true);
+      }
+
+      renderOrderSummary();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChocoRank - Thống Kê & Bảng Xếp Hạng Những Loại Socola Ngon Nhất & Đáng Mua Nhất</title>
+  <meta name="description" content="Khám phá bảng xếp hạng và thống kê chuyên sâu về những loại socola ngon nhất, đáng mua nhất thế giới và Việt Nam. Đánh giá đa chiều nồng độ cacao, giá thành, nốt hương vị giác.">
+  <meta name="keywords" content="socola ngon nhất, socola đáng mua nhất, bảng xếp hạng socola, socola đen, socola tươi nama, socola marou, lindt excellence, godiva">
+  
+  <!-- Open Graph / Social -->
+  <meta property="og:title" content="ChocoRank - Top Socola Ngon Nhất & Đáng Mua Nhất">
+  <meta property="og:description" content="Nền tảng thống kê và đánh giá socola thượng hạng toàn cầu. Tìm kiếm loại socola chân ái phù hợp với gu của bạn.">
+  <meta property="og:image" content="assets/images/hero.jpg">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍫</text></svg>">
+
+  <!-- Fonts & Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       SITE HEADER / NAVIGATION
+       ======================================================================== -->
+  <header class="site-header">
+    <div class="container nav-content">
+      <a href="#" class="logo" id="brandLogo">
+        <div class="logo-icon">🍫</div>
+        <div class="logo-text">
+          <span class="logo-title">Choco<span class="text-gold">Rank</span></span>
+          <span class="logo-subtitle">Tinh Hoa Socola Thượng Hạng</span>
+        </div>
+      </a>
+
+      <nav aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a href="#rankings" class="nav-link active" data-nav-mode="chocolate">Bảng Xếp Hạng Socola</a></li>
+          <li><a href="#rankings" class="nav-link" data-nav-mode="candy" id="navCandiesLink">🍬 Top Kẹo Ngon Nhất</a></li>
+          <li><a href="#eating-styles" class="nav-link" id="navEatingStylesLink">🍽️ Kiểu Ăn Sáng Tạo</a></li>
+          <li><a href="#authenticity" class="nav-link" id="navCandyAuthLink" onclick="switchAuthGuide('candy')">🍬 Kẹo Thật - Giả</a></li>
+          <li><a href="#authenticity" class="nav-link" id="navChocoAuthLink" onclick="switchAuthGuide('chocolate')">🍫 Socola Thật - Giả</a></li>
+          <li><a href="#statistics" class="nav-link">Thống Kê Thị Hiếu</a></li>
+          <li><a href="#quiz-section" class="nav-link">Trắc Nghiệm Gu</a></li>
+          <li><a href="#guide" class="nav-link">Cách Thưởng Thức</a></li>
+          <li><a href="#buy-guide" class="nav-link nav-buy-link" id="navBuyGuideBtn">🛒 Nơi Mua Uy Tín</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="checkout.html" class="action-btn" id="cartNavBtn" title="Xem giỏ hàng & thanh toán" style="text-decoration: none;">
+          <span>🛒 Giỏ Hàng</span>
+          <span class="badge-count" id="cartCountBadge" style="display: none;">0</span>
+        </a>
+
+        <button class="action-btn" id="wishlistBtn" title="Xem danh sách yêu thích" aria-label="Danh sách yêu thích">
+          <span>❤️ Yêu Thích</span>
+          <span class="badge-count" id="wishlistCountBadge">0</span>
+        </button>
+
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Chuyển đổi giao diện Sáng / Tối" aria-label="Đổi giao diện">
+          🌙
+        </button>
+
+        <!-- Auth Container -->
+        <div id="authNavContainer"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========================================================================
+         HERO BANNER SECTION
+         ======================================================================== -->
+    <section class="hero" id="hero">
+      <div class="hero-bg"></div>
+      <div class="container hero-grid">
+        <div class="hero-left">
+          <div class="hero-tag">
+            <span>✨ Báo Cáo Xếp Hạng & Thống Kê Tiêu Dùng 2025/2026</span>
+          </div>
+
+          <h1 class="hero-title">
+            Thống Kê Những Loại <span class="gold-gradient-text">Socola Ngon Nhất</span> & Đáng Mua Nhất
+          </h1>
+
+          <p class="hero-desc">
+            Dữ liệu phân tích và xếp hạng chuyên sâu dựa trên hơn <strong>48.500+</strong> đánh giá của chuyên gia nếm thử và cộng đồng người tiêu dùng sành ăn. Khám phá các dòng socola đạt giải quốc tế, tỉ lệ giá trị vượt trội và hương vị khó quên.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="#rankings" class="btn-primary" id="btnExploreRankings">
+              <span>🏆 Xem Bảng Xếp Hạng Ngay</span>
+            </a>
+            <button class="btn-secondary" id="startQuizHeroBtn">
+              <span>🍫 Trắc Nghiệm Socola (15s)</span>
+            </button>
+            <button class="btn-secondary btn-hero-candy" id="startCandyQuizHeroBtn">
+              <span>🍬 Trắc Nghiệm Chọn Kẹo (15s)</span>
+            </button>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number">12+</span>
+              <span class="stat-label">Dòng Socola Đỉnh Cao</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">9.55/10</span>
+              <span class="stat-label">Điểm Hài Lòng Trung Bình</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">48.500+</span>
+              <span class="stat-label">Lượt Đánh Giá Người Dùng</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Bơ Cacao Tinh Khiết</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Featured Highlight Card -->
+        <div class="hero-right">
+          <div class="hero-card">
+            <div class="hero-card-img-wrap">
+              <img src="assets/images/marou_daklak.jpg" alt="Marou Đắk Lắk 70% Single Origin" class="hero-card-img">
+              <span class="hero-card-badge">🏆 TOP 1 TOÀN DIỆN</span>
+            </div>
+            <div class="hero-card-content">
+              <h3>Marou Đắk Lắk 70% Cacao</h3>
+              <p>Thương hiệu Bean-to-bar thủ công Việt Nam được New York Times ca ngợi tinh tế nhất thế giới.</p>
+              <div class="hero-card-footer">
+                <div>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Điểm Chuyên Môn</span>
+                  <span style="font-size: 1.4rem; font-weight: 800; color: var(--gold-light);">★ 9.8 / 10</span>
+                </div>
+                <div class="hero-card-price">135.000₫</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         STATISTICS & INSIGHTS DASHBOARD
+         ======================================================================== -->
+    <section class="stats-section" id="statistics">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">DỮ LIỆU THỐNG KÊ THỰC TẾ</span>
+          <h2 class="section-title">Xu Hướng & Thị Hiếu Người Tiêu Dùng Socola</h2>
+          <p class="section-subtitle">Phân tích hành vi chọn mua, nồng độ cacao yêu thích và các thủ phủ socola danh tiếng được săn đón nhất hiện nay.</p>
+        </div>
+
+        <div class="stats-grid">
+          <!-- Stat Box 1 -->
+          <div class="stat-box">
+            <span class="stat-box-icon">📊</span>
+            <h3 class="stat-box-title">
+              <span>Thị Phần Theo Dòng Socola</span>
+              <span class="text-gold">4 Nhóm</span>
+            </h3>
+            <div class="progress-list" id="statsCategoryBars">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Stat Box 2 -->
+          <div class="stat-box">
+            <span class="stat-box-icon">🍫</span>
+            <h3 class="stat-box-title">
+              <span>Nồng Độ Cacao Được Mua Nhiều</span>
+              <span class="text-gold">Tỉ Lệ %</span>
+            </h3>
+            <div class="progress-list" id="statsCocoaBars">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Stat Box 3 -->
+          <div class="stat-box">
+            <span class="stat-box-icon">🌍</span>
+            <h3 class="stat-box-title">
+              <span>Thủ Phủ Socola Uy Tín Nhất</span>
+              <span class="text-gold">Điểm Danh Tiếng</span>
+            </h3>
+            <div class="progress-list" id="statsOriginList">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Fast Key Insights -->
+        <div class="insights-row">
+          <div class="insight-card">
+            <div class="insight-icon">💰</div>
+            <div class="insight-text">
+              <h4>Đáng Tiền Nhất (P/P)</h4>
+              <p>Lindt Excellence 85% & Tony's Caramel Sea Salt dẫn đầu về chất lượng trên giá bán.</p>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-icon">👑</div>
+            <div class="insight-text">
+              <h4>Đỉnh Cao Quà Tặng</h4>
+              <p>Godiva Ballotin & Royce' Nama được chọn làm quà biếu nhiều nhất vào các dịp lễ kỷ niệm.</p>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-icon">🌿</div>
+            <div class="insight-text">
+              <h4>Socola Sức Khỏe</h4>
+              <p>Nồng độ 70% - 85% Cacao giàu chất chống oxy hóa, ít đường, hỗ trợ tim mạch & tập gym.</p>
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-icon">🇻🇳</div>
+            <div class="insight-text">
+              <h4>Niềm Tự Hào Việt Nam</h4>
+              <p>Marou chứng minh cacao Việt Nam đạt chất lượng hảo hạng bậc nhất trên bản đồ thế giới.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         TASTE & CANDY QUIZ HUB
+         ======================================================================== -->
+    <section class="container" id="quiz-section">
+      <div class="section-header" style="margin-bottom: 24px; text-align: center;">
+        <span class="section-badge">GỢI Ý THÔNG MINH CÁ NHÂN HÓA</span>
+        <h2 class="section-title">Trắc Nghiệm Tìm Món Ngon "Chân Ái" Của Riêng Bạn</h2>
+        <p class="section-subtitle">Chỉ mất 15 giây với 3 câu hỏi nhanh, hệ thống sẽ đề xuất ngay loại socola hoặc kẹo ngon nhất chuẩn gu của bạn!</p>
+      </div>
+
+      <div class="quiz-hub-grid">
+        <!-- Card 1: Chocolate Quiz -->
+        <div class="quiz-card quiz-card-choco">
+          <div class="quiz-card-header">
+            <span class="quiz-card-icon">🍫</span>
+            <span class="quiz-card-tag">DÀNH CHO TÍN ĐỒ SOCOLA</span>
+          </div>
+          <h3>Trắc Nghiệm Tìm Socola Hợp Gu</h3>
+          <p>Khám phá loại socola đen nguyên bản, socola tươi Nama tan chảy hay praline hạt phỉ hoàng gia sinh ra để dành cho bạn.</p>
+          <ul class="quiz-card-features">
+            <li>✓ Phân tích gu đắng, ngọt & độ tan chảy</li>
+            <li>✓ Đề xuất theo ngân sách & dịp thưởng thức</li>
+          </ul>
+          <button class="btn-primary" id="startQuizBtn">
+            <span>🎯 Bắt Đầu Trắc Nghiệm Socola (15s)</span>
+          </button>
+        </div>
+
+        <!-- Card 2: Candy Quiz -->
+        <div class="quiz-card quiz-card-candy">
+          <div class="quiz-card-header">
+            <span class="quiz-card-icon">🍬</span>
+            <span class="quiz-card-tag candy-tag">DÀNH CHO TÍN ĐỒ KẸO NGON</span>
+          </div>
+          <h3>Trắc Nghiệm Chọn Loại Kẹo Phù Hợp</h3>
+          <p>Tìm xem bạn thuộc gu kẹo dẻo gấu Haribo, kẹo bơ caramel béo ngậy, kẹo ngậm thảo mộc Alps hay kẹo dừa dân dã!</p>
+          <ul class="quiz-card-features">
+            <li>✓ Phân tích cảm giác nhai: dẻo dai, ngậm tan hay giòn rụm</li>
+            <li>✓ Đề xuất theo hoàn cảnh: ăn vặt, dịu họng, để xe ô tô hay uống trà</li>
+          </ul>
+          <button class="btn-candy-primary" id="startCandyQuizBtn">
+            <span>🍬 Bắt Đầu Trắc Nghiệm Kẹo (15s)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         RANKINGS & PRODUCT SHOWCASE
+         ======================================================================== -->
+    <section class="rankings-section" id="rankings">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge" id="rankingSectionBadge">BẢNG XẾP HẠNG TOÀN DIỆN</span>
+          <h2 class="section-title" id="rankingSectionTitle">Bảng Xếp Hạng Socola & Kẹo Ngon Nhất</h2>
+          <p class="section-subtitle" id="rankingSectionSubtitle">Được xếp hạng chi tiết theo thang điểm 10 đa chiều: Độ đắng/ngọt, độ mịn tan chảy/dẻo giòn, hương thơm và tỉ lệ giá trị.</p>
+        </div>
+
+        <!-- Ranking Type Switcher (Socola / Kẹo Ngon Nhất / Tất Cả) -->
+        <div class="ranking-mode-switch" id="rankingModeSwitch">
+          <button class="mode-btn active" data-mode="chocolate" id="modeBtnChocolate">
+            <span class="mode-icon">🍫</span>
+            <span class="mode-title">Top Socola Ngon Nhất</span>
+            <span class="mode-count">12 dòng</span>
+          </button>
+          <button class="mode-btn" data-mode="candy" id="modeBtnCandy">
+            <span class="mode-icon">🍬</span>
+            <span class="mode-title">Top Kẹo Ngon Nhất</span>
+            <span class="mode-count">8 loại</span>
+          </button>
+          <button class="mode-btn" data-mode="all" id="modeBtnAll">
+            <span class="mode-icon">✨</span>
+            <span class="mode-title">Tất Cả (Socola & Kẹo)</span>
+            <span class="mode-count">20 món</span>
+          </button>
+        </div>
+
+        <!-- Candy Authenticity Warning & Fast-jump Banner -->
+        <div class="candy-auth-alert-banner" id="candyAuthAlertBanner" style="display: none;">
+          <div class="candy-auth-alert-left">
+            <span class="candy-auth-badge">🔬 THẨM ĐỊNH KẸO CHUẨN</span>
+            <h4 class="candy-auth-title">Cảnh Báo: Cách Nhận Biết Kẹo Thật vs Kẹo Nhái Phẩm Màu Độc Hại</h4>
+            <p class="candy-auth-desc">
+              Kẹo giá rẻ trôi nổi thường dùng phẩm màu công nghiệp Azo, shortening và bột năng dính kẽ răng. Khám phá 4 bài test 10 giây tại nhà: Thử đốt mép kẹo, ngâm nước ấm phai màu, soi lớp phấn icing và chữ dập nổi!
+            </p>
+          </div>
+          <button type="button" class="btn-candy-auth-jump" onclick="switchAuthGuide('candy')">
+            <span>🛡️ Mở Phòng Test Kẹo Thật - Giả →</span>
+          </button>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="filter-wrapper">
+          <div class="search-and-sort">
+            <div class="search-input-group">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInput" class="search-input" placeholder="Tìm theo tên socola, thương hiệu (Marou, Lindt, Royce'...), xuất xứ hoặc hương vị...">
+              <button id="clearSearchBtn" class="clear-search-btn" title="Xóa tìm kiếm">✕</button>
+            </div>
+
+            <!-- Cocoa % Filter -->
+            <select id="cocoaFilterSelect" class="select-control" aria-label="Lọc theo nồng độ cacao">
+              <option value="all">Tất cả % Cacao</option>
+              <option value="under50">&lt; 50% Cacao (Ngọt & Béo)</option>
+              <option value="50to70">50% - 70% Cacao (Cân Bằng)</option>
+              <option value="70to85">70% - 85% Cacao (Đậm Vị Chuẩn Gu)</option>
+              <option value="above85">&gt; 85% Cacao (Đắng Nguyên Bản)</option>
+            </select>
+
+            <!-- Price Tier Filter -->
+            <select id="priceFilterSelect" class="select-control" aria-label="Lọc theo phân khúc giá">
+              <option value="all">Tất cả mức giá</option>
+              <option value="low">Tiết kiệm / Đáng Mua Nhất (&lt; 100k)</option>
+              <option value="mid">Tầm trung (100k - 250k)</option>
+              <option value="high">Cao cấp / Quà tặng xa xỉ (&gt; 250k)</option>
+            </select>
+
+            <!-- Sort By -->
+            <select id="sortSelect" class="select-control" aria-label="Sắp xếp danh sách">
+              <option value="rating">Sắp xếp: Điểm Đánh Giá Cao Nhất</option>
+              <option value="value">Sắp xếp: Đáng Tiền Nhất (P/P)</option>
+              <option value="price-asc">Sắp xếp: Giá từ Thấp đến Cao</option>
+              <option value="price-desc">Sắp xếp: Giá từ Cao đến Thấp</option>
+              <option value="cocoa-desc">Sắp xếp: Nồng Độ Cacao Giảm Dần</option>
+            </select>
+          </div>
+
+          <!-- Category Pills -->
+          <div class="category-pills" id="categoryPillsContainer" role="tablist">
+            <button class="pill-btn active" data-category="all" role="tab">Tất Cả (12)</button>
+            <button class="pill-btn" data-category="dark" role="tab">Socola Đen Thượng Hạng</button>
+            <button class="pill-btn" data-category="nama" role="tab">Socola Tươi (Nama)</button>
+            <button class="pill-btn" data-category="artisanal" role="tab">Socola Nghệ Nhân (Bean-to-Bar)</button>
+            <button class="pill-btn" data-category="praline" role="tab">Hạt Phỉ & Praline</button>
+            <button class="pill-btn" data-category="milk" role="tab">Socola Sữa & Caramel</button>
+            <button class="pill-btn" data-category="white" role="tab">Socola Trắng & Matcha</button>
+          </div>
+
+          <div class="secondary-filters">
+            <div class="filter-tags-wrap">
+              <span class="filter-tag-label">💡 Mẹo tìm nhanh:</span>
+              <span>Bấm vào thẻ hương vị (🏷️) hoặc nút "So sánh" để đặt các loại cạnh nhau.</span>
+            </div>
+            <button class="btn-reset-filters" id="resetFiltersBtn">↺ Đặt lại bộ lọc</button>
+          </div>
+        </div>
+
+        <!-- Results Header & Counter -->
+        <div class="results-header">
+          <div class="results-count" id="resultsCount">
+            Hiển thị <strong>12</strong> loại socola được bình chọn hàng đầu
+          </div>
+        </div>
+
+        <!-- Chocolate Grid -->
+        <div class="chocolate-grid" id="chocolateGrid">
+          <!-- Dynamic cards rendered by js/app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         HOW TO TASTE CHOCOLATE LIKE AN EXPERT
+         ======================================================================== -->
+    <section class="guide-section" id="guide">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">CẨM NANG ẨM THỰC</span>
+          <h2 class="section-title">5 Bước Thưởng Thức Socola Chuẩn Chuyên Gia</h2>
+          <p class="section-subtitle">Để cảm nhận trọn vẹn dải hương vị phức hợp, hãy đánh thức 5 giác quan của bạn.</p>
+        </div>
+
+        <div class="guide-grid">
+          <div class="guide-step-card">
+            <div class="guide-step-num">01</div>
+            <h4>Nhìn (Look)</h4>
+            <p>Bề mặt socola thượng hạng phải bóng mượt, đồng màu, không có vệt đốm trắng do nhiệt độ.</p>
+          </div>
+
+          <div class="guide-step-card">
+            <div class="guide-step-num">02</div>
+            <h4>Bẻ (Snap)</h4>
+            <p>Bẻ thanh socola nghe tiếng "tách" vang giòn rõ ràng minh chứng cho hàm lượng bơ cacao tinh khiết chuẩn hóa.</p>
+          </div>
+
+          <div class="guide-step-card">
+            <div class="guide-step-num">03</div>
+            <h4>Ngửi (Smell)</h4>
+            <p>Đưa miếng socola lên mũi hít sâu để cảm nhận các nốt hương đầu: hoa cỏ, trái cây mọng, hạt dẻ hay hương gỗ.</p>
+          </div>
+
+          <div class="guide-step-card">
+            <div class="guide-step-num">04</div>
+            <h4>Tan Chảy (Melt)</h4>
+            <p>Đặt miếng socola trên lưỡi, không nhai vội. Hãy để nhiệt độ cơ thể làm bơ cacao tự tan chảy từ từ.</p>
+          </div>
+
+          <div class="guide-step-card">
+            <div class="guide-step-num">05</div>
+            <h4>Cảm Vị (Savor)</h4>
+            <p>Hít thở nhẹ bằng mũi khi nuốt để cảm nhận hậu vị đắng thanh, chua dịu và nốt ngọt lưu luyến nơi vòm họng.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         CREATIVE EATING STYLES & PAIRINGS LAB (CÁC KIỂU ĂN SOCOLA & KẸO ĐỘC ĐÁO)
+         ======================================================================== -->
+    <section class="eating-styles-section" id="eating-styles">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">NGHỆ THUẬT BIẾN TẤU & THƯỞNG THỨC</span>
+          <h2 class="section-title">Các Kiểu Ăn Socola & Kẹo Độc Đáo, Bùng Nổ Vị Giác</h2>
+          <p class="section-subtitle">
+            Đừng chỉ ăn theo cách thông thường! Thử ngay 10+ công thức ẩm thực sáng tạo: từ chấm sữa tươi nóng béo ngậy, ngâm kẹo dẻo vào nước ép có ga, nướng chảy kẹp bánh giòn đến lẩu fondue trái cây tươi mọng.
+          </p>
+        </div>
+
+        <!-- Interactive Random Tasting Idea Generator Banner -->
+        <div class="random-tasting-banner">
+          <div class="random-banner-left">
+            <span class="random-dice-icon">🎲</span>
+            <div>
+              <h4 class="random-banner-title">Hôm Nay Bạn Muốn Thử Kiểu Ăn Nào?</h4>
+              <p class="random-banner-desc">Nhấn nút bên cạnh để nhận ngẫu nhiên 1 công thức thưởng thức độc lạ và xem gợi ý sản phẩm phù hợp nhất!</p>
+            </div>
+          </div>
+          <button type="button" class="btn-random-generate" id="randomEatingStyleBtn">
+            <span>✨ Gợi Ý Ngẫu Nhiên 1 Kiểu Ăn</span>
+          </button>
+        </div>
+
+        <!-- Eating Styles Category Filter Tabs -->
+        <div class="styles-filter-tabs" id="stylesFilterTabs" role="tablist">
+          <button class="style-tab-btn active" data-style-filter="all">
+            <span>✨ Tất Cả (10 Kiểu)</span>
+          </button>
+          <button class="style-tab-btn" data-style-filter="milk-dip">
+            <span>🥛 Chấm Sữa & Fondue</span>
+          </button>
+          <button class="style-tab-btn" data-style-filter="juice-drink">
+            <span>🍹 Pha Nước Ép & Mocktail</span>
+          </button>
+          <button class="style-tab-btn" data-style-filter="cold-dessert">
+            <span>❄️ Ăn Kèm Kem & Ướp Lạnh</span>
+          </button>
+          <button class="style-tab-btn" data-style-filter="bake-melt">
+            <span>🍪 Nướng Chảy & Kẹp Bánh</span>
+          </button>
+          <button class="style-tab-btn" data-style-filter="tea-coffee">
+            <span>☕ Trà & Cà Phê Thượng Hạng</span>
+          </button>
+          <button class="style-tab-btn" data-style-filter="gourmet-twist">
+            <span>🧂 Biến Tấu Michelin</span>
+          </button>
+        </div>
+
+        <!-- Grid Container for Style Cards -->
+        <div class="eating-styles-grid" id="eatingStylesGrid">
+          <!-- Dynamically populated by js/app.js -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         AUTHENTICITY GUIDE & LAB (CẨM NANG PHÂN BIỆT SOCOLA & KẸO THẬT - GIẢ)
+         ======================================================================== -->
+    <section class="authenticity-section" id="authenticity">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">CẨM NANG THẨM ĐỊNH CHẤT LƯỢNG</span>
+          <h2 class="section-title">Cách Phân Biệt Socola Thật vs Giả & Nhận Biết Kẹo Chuẩn</h2>
+          <p class="section-subtitle">
+            Bảo vệ sức khỏe và túi tiền của bạn: Bí quyết phân biệt 100% bơ cacao nguyên chất với mỡ thực vật thay thế (CBS), kẹo dẻo nước ép thật với kẹo phẩm màu hóa chất độc hại.
+          </p>
+        </div>
+
+        <!-- Mode Switcher: Socola Thật-Giả vs Kẹo Thật-Giả -->
+        <div class="auth-guide-tabs" id="authGuideTabs" role="tablist">
+          <button class="auth-tab-btn active" data-auth-target="chocolate">
+            <span>🍫 Phân Biệt Socola Thật vs Socola Hợp Chất (Giả)</span>
+          </button>
+          <button class="auth-tab-btn" data-auth-target="candy">
+            <span>🍬 Phân Biệt Kẹo Chuẩn vs Kẹo Nhái Phẩm Màu</span>
+          </button>
+        </div>
+
+        <!-- PANEL 1: SOCOLA THẬT VS SOCOLA GIẢ -->
+        <div class="auth-panel active" id="authPanelChocolate">
+          <div class="matrix-card-wrap">
+            <h3 class="matrix-title">⚖️ Bảng So Sánh Đối Đầu Trực Diện: Socola Thật vs Socola Giả</h3>
+            <div class="matrix-table-wrap">
+              <table class="auth-matrix-table">
+                <thead>
+                  <tr>
+                    <th style="width: 22%;">Tiêu Chí Đánh Giá</th>
+                    <th style="width: 39%;" class="col-real">
+                      <div class="table-header-pill pill-real">✅ SOCOLA THẬT (REAL CHOCOLATE)</div>
+                    </th>
+                    <th style="width: 39%;" class="col-fake">
+                      <div class="table-header-pill pill-fake">❌ SOCOLA GIẢ / HỢP CHẤT (COMPOUND)</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Thành Phần Cốt Lõi</strong></td>
+                    <td class="col-real">
+                      <strong>100% Bơ Cacao Tinh Khiết (Cocoa Butter)</strong> ép từ hạt cacao tự nhiên. Có thể chứa một lượng nhỏ sữa bột nguyên kem (với socola sữa).
+                    </td>
+                    <td class="col-fake">
+                      <strong>Dầu Cọ Hydro Hóa (Hydrogenated Palm Oil)</strong>, chất thay thế bơ cacao (CBS/CBR), bột béo công nghiệp và đường chiếm 60-70%.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Nhiệt Độ & Tốc Độ Tan Chảy</strong></td>
+                    <td class="col-real">
+                      <strong>Tan ở 34°C - 36°C</strong> (Đúng bằng thân nhiệt người). Đặt lên đầu ngón tay hoặc ngậm vào miệng là tan chảy lướt êm dịu, không hề nhờn dính.
+                    </td>
+                    <td class="col-fake">
+                      <strong>Chỉ tan ở 40°C - 45°C</strong> (Cao hơn thân nhiệt). Cầm lâu không chảy, ngậm trong miệng để lại lớp màng dầu mỡ dính nhớp như sáp nến trên vòm họng.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Âm Thanh Khi Bẻ (Snap Sound)</strong></td>
+                    <td class="col-real">
+                      Bẻ nghe tiếng <strong>"TÁCH" đanh giòn vang rõ</strong>, đường nứt sắc nét, không bị vỡ vụn bở (nhờ cấu trúc tinh thể bơ cacao Form V hoàn hảo).
+                    </td>
+                    <td class="col-fake">
+                      Bẻ mềm ỉu hoặc dẻo dai, dễ cong gập, mặt vỡ lởm chởm xốp bở, tiếng bẻ nghe "bụp" đục ngầu không đanh tai.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Hiện Tượng Nở Hoa Bơ (Fat Bloom)</strong></td>
+                    <td class="col-real">
+                      <strong>Có thể xuất hiện lớp màng mỏng trắng bạc</strong> khi thay đổi nhiệt độ đột ngột. Đây là bơ cacao tái kết tinh tự nhiên, hoàn toàn ăn được và là minh chứng của socola xịn!
+                    </td>
+                    <td class="col-fake">
+                      <strong>Bề mặt luôn bóng lì giả tạo</strong>, không bao giờ nở hoa bơ vì trong thành phần hoàn toàn không có bơ cacao thật.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Tầng Hương & Dư Vị</strong></td>
+                    <td class="col-real">
+                      Đa tầng hương tự nhiên (hoa quả rừng, gỗ, hạt dẻ, mật ong). Hậu vị đắng thanh, chua dịu của cacao lên men và đọng lại vị ngọt sâu lắng.
+                    </td>
+                    <td class="col-fake">
+                      Ngọt gắt khé cổ họng, sực nồng mùi hương liệu vanillin nhân tạo rẻ tiền, ăn xong có cảm giác đầy bụng ngấy mỡ.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Giá Trị Sức Khỏe & Giá Bán</strong></td>
+                    <td class="col-real">
+                      Giàu chất chống oxy hóa (Flavanol), hỗ trợ tim mạch, hạ huyết áp, tốt cho não bộ. Giá thành tương xứng chất lượng (từ 70.000đ - 300.000đ/thanh).
+                    </td>
+                    <td class="col-fake">
+                      Chứa nhiều chất béo chuyển hóa (trans fat) gây tăng mỡ máu và hại gan mạch. Giá rất rẻ (chỉ từ vài nghìn đến mười mấy nghìn đồng).
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 4 BƯỚC THỬ NGHIỆM NHANH DÀNH CHO SOCOLA -->
+          <div class="home-tests-section" id="chocolateHomeTestsSection">
+            <div class="home-tests-header">
+              <span class="home-test-tag">🔬 PHÒNG TEST SOCOLA TẠI GIA</span>
+              <h3 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--text-main); margin: 6px 0 10px;">
+                4 Mẹo Thử Nghiệm Nhanh 10 Giây Nhận Biết Socola Thật vs Giả
+              </h3>
+              <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+                Kiểm tra nhanh xem thanh socola của bạn có chứa 100% bơ cacao nguyên chất hay không:
+              </p>
+            </div>
+
+            <div class="tests-grid">
+              <div class="test-card">
+                <div class="test-icon-badge">🖐️</div>
+                <h4>1. Thử Thân Nhiệt (36°C Test)</h4>
+                <p>Kẹp miếng socola giữa 2 ngón tay trong 10 giây. Nếu ngón tay dính một lớp bơ mịn tan chảy như kem lỏng -> <strong>Socola Thật</strong>. Nếu không chảy tí nào -> <strong>Socola Dầu Cọ Giả</strong>.</p>
+              </div>
+
+              <div class="test-card">
+                <div class="test-icon-badge">👂</div>
+                <h4>2. Thử Tiếng "Tách" (Snap Test)</h4>
+                <p>Đặt thanh socola gần tai và bẻ đôi. Tiếng bẻ vang giòn "tách" đanh tai, vết gãy phẳng lì -> <strong>Bơ cacao thật</strong>. Tiếng bẻ mềm ỉu hoặc vỡ vụn lả tả -> <strong>Chất béo thay thế</strong>.</p>
+              </div>
+
+              <div class="test-card">
+                <div class="test-icon-badge">❄️</div>
+                <h4>3. Thử Hiện Tượng Hoa Bơ (Fat Bloom)</h4>
+                <p>Thấy màng mỏng trắng bạc sau khi để tủ lạnh: Đây là bơ cacao tái kết tinh tự nhiên -> <strong>Bằng chứng socola xịn 100%</strong>. Socola giả luôn bóng lỳ vì không có bơ cacao.</p>
+              </div>
+
+              <div class="test-card">
+                <div class="test-icon-badge">🔍</div>
+                <h4>4. Soi Bảng Nhãn (Label Check)</h4>
+                <p>Tìm dòng thành phần: Nhìn thấy <em>"Cocoa Butter / Bơ Cacao"</em> ở vị trí đầu -> <strong>Chuẩn xịn</strong>. Nếu thấy <em>"Hydrogenated Palm Oil / CBS / Dầu Cọ / Bơ Thực Vật"</em> -> <strong>Socola Giả</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL 2: KẸO THẬT VS KẸO GIẢ / PHẨM MÀU -->
+        <div class="auth-panel" id="authPanelCandy">
+          <div class="matrix-card-wrap">
+            <h3 class="matrix-title">⚖️ Bảng Phân Biệt Các Loại Kẹo Chuẩn vs Kẹo Nhái Hóa Chất</h3>
+            <div class="matrix-table-wrap">
+              <table class="auth-matrix-table">
+                <thead>
+                  <tr>
+                    <th style="width: 22%;">Dòng Kẹo</th>
+                    <th style="width: 39%;" class="col-real">
+                      <div class="table-header-pill pill-real">✅ KẸO CHÍNH HÃNG / TRUYỀN THỐNG</div>
+                    </th>
+                    <th style="width: 39%;" class="col-fake">
+                      <div class="table-header-pill pill-fake">❌ KẸO NHÁI / KÉM CHẤT LƯỢNG</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Kẹo Dẻo Trái Cây (Haribo...)</strong></td>
+                    <td class="col-real">
+                      Làm từ <strong>nước ép trái cây cô đặc tự nhiên</strong> + Gelatin thực phẩm tinh khiết. Màu sắc trong trẻo tự nhiên, đàn hồi nhai sần sật. Ngâm nước ấm tan chậm, nước vẫn giữ độ trong.
+                    </td>
+                    <td class="col-fake">
+                      Dùng <strong>phẩm màu công nghiệp Azo (E102, E133)</strong> + gelatin bẩn. Ngâm nước 2 phút là nước chuyển sang màu xanh/đỏ lòe loẹt đục ngầu, kẹo nhão nhoét có mùi hắc.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Kẹo Bơ Caramel & Toffee (Werther's...)</strong></td>
+                    <td class="col-real">
+                      Nấu từ <strong>bơ kem sữa tươi thật (Real Butter & Cream)</strong> + đường nâu và muối biển. Vị béo thơm ấm áp, tan êm dịu sạch sẽ trong miệng không để lại cặn ngấy.
+                    </td>
+                    <td class="col-fake">
+                      Làm từ <strong>shortening công nghiệp / dầu cọ hydro hóa</strong> + hương liệu bơ tổng hợp. Vị ngọt lợ, cắn lợn cợn cặn bột, ngậm xong để lại lớp màng mỡ đông ngấy nhớn trên lưỡi.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Kẹo Dừa Sáp Bến Tre</strong></td>
+                    <td class="col-real">
+                      Nấu từ <strong>100% nước cốt dừa tươi nguyên chất</strong> + mạch nha nếp thơm. Mùi thơm dừa thoang thoảng dịu nhẹ, ăn béo bùi dẻo mịn, <strong>TUYỆT ĐỐI KHÔNG DÍNH RĂNG</strong>.
+                    </td>
+                    <td class="col-fake">
+                      Pha nhiều bột năng, đường cát rẻ tiền và hương dừa nhân tạo nồng gắt. Kẹo cứng đơ hoặc dính chặt vào kẽ răng, ngọt khé cổ và không có độ béo tự nhiên.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Kẹo Trái Cây Hộp Thiếc (Cavendish...)</strong></td>
+                    <td class="col-real">
+                      Hộp thiếc dập nổi vàng kim sang trọng, có <strong>lớp đường phấn icing tự nhiên chống dính</strong>. Kẹo trong suốt như pha lê, vị nước ép hoa quả nguyên chất chua ngọt thanh tao.
+                    </td>
+                    <td class="col-fake">
+                      Vỏ hộp thiếc mỏng dễ hoen gỉ, kẹo bên trong <strong>chảy nước dính bết thành một tảng đặc quánh</strong>, ngọt gắt đường hóa học và nồng mùi hương liệu tổng hợp.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Kẹo Sỏi Socola Hạt (M&M's...)</strong></td>
+                    <td class="col-real">
+                      Vỏ đường láng bóng in chữ 'm' sắc nét, <strong>hạt đậu phộng mẩy rang chín vàng thơm bùi</strong> bọc trong lớp socola sữa thật mềm mịn.
+                    </td>
+                    <td class="col-fake">
+                      Vỏ kẹo sần sùi dễ phai màu ra tay, hạt đậu teo ỉu hoặc mốc cũ hôi dầu, lớp socola giả bở bột không tan, phẩm màu công nghiệp độc hại.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Kẹo Thảo Mộc (Ricola...)</strong></td>
+                    <td class="col-real">
+                      Dập nổi logo <strong>'Ricola' sắc nét góc cạnh</strong>. Chiết xuất 13 loại thảo dược núi tuyết Thụy Sĩ, the mát thanh khiết tự nhiên, làm dịu êm họng suốt 30 phút.
+                    </td>
+                    <td class="col-fake">
+                      Chữ in nhòe nhoẹt mờ nhạt, kẹo dính bết vào giấy bọc. Ngậm vào có vị cay nồng xộc mũi của tinh dầu tổng hợp, ngậm xong rát lưỡi và cổ họng.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>Kẹo Cu Đơ Hà Tĩnh</strong></td>
+                    <td class="col-real">
+                      Bánh tráng nướng giòn rụm không cháy, <strong>mật mía nguyên chất vàng óng dẻo quánh</strong>, hạt đậu phộng to mẩy giòn tan, thơm nồng gừng già tươi ấm áp.
+                    </td>
+                    <td class="col-fake">
+                      Bánh tráng ỉu dai, mật mía cháy xỉn màu pha đường hóa học, hạt đậu phộng teo tóp mốc cũ có mùi dầu hôi, ăn ngọt gắt rát họng.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 4 BƯỚC THỬ NGHIỆM NHANH CHUYÊN BIỆT CHO KẸO -->
+          <div class="home-tests-section">
+            <div class="home-tests-header">
+              <span class="home-test-tag" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">🔬 PHÒNG TEST KẸO TẠI GIA</span>
+              <h3 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--text-main); margin: 6px 0 10px;">
+                4 Mẹo Thử Nghiệm Nhanh 10 Giây Nhận Biết Kẹo Thật vs Kẹo Nhái
+              </h3>
+              <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+                Áp dụng ngay các mẹo thẩm định thực tế để kiểm tra kẹo dẻo, kẹo dừa, kẹo bơ và kẹo thảo dược:
+              </p>
+            </div>
+
+            <div class="tests-grid">
+              <div class="test-card">
+                <div class="test-icon-badge" style="background: rgba(239, 68, 68, 0.12);">🔥</div>
+                <h4>1. Thử Đốt Kẹo Dẻo (Burn Test)</h4>
+                <p>Dùng bật lửa hơ mép viên kẹo dẻo: Kẹo gelatin sạch chảy trong suốt, thơm mùi đường thắng caramel -> <strong>Kẹo Thật</strong>. Kẹo bốc khói đen xì, khét lẹt mùi nhựa cao su -> <strong>Kẹo Hóa Chất Độc Hại</strong>.</p>
+              </div>
+
+              <div class="test-card">
+                <div class="test-icon-badge" style="background: rgba(16, 185, 129, 0.12);">🦷</div>
+                <h4>2. Thử Độ Dính Răng (Stick Test)</h4>
+                <p>Cắn thử kẹo dừa hoặc kẹo bơ caramel: Kẹo mềm dẻo bùi béo tan êm, <strong>tuyệt đối không dính kẽ răng</strong> -> <strong>Kẹo Xịn</strong>. Kẹo dính chặt bết vào răng rất khó cậy -> <strong>Pha bột năng & đường hóa học</strong>.</p>
+              </div>
+
+              <div class="test-card">
+                <div class="test-icon-badge" style="background: rgba(59, 130, 246, 0.12);">💧</div>
+                <h4>3. Thử Nước Ấm Phai Màu (Water Test)</h4>
+                <p>Thả kẹo dẻo hoặc kẹo sỏi vào cốc nước ấm: Nước vẫn trong veo, kẹo nở to đàn hồi -> <strong>Nước ép trái cây thật</strong>. Nước đổi màu xanh đỏ loang lổ đục ngầu -> <strong>Phẩm màu công nghiệp Azo</strong>.</p>
+              </div>
+
+              <div class="test-card">
+                <div class="test-icon-badge" style="background: rgba(212, 175, 55, 0.12);">🥫</div>
+                <h4>4. Soi Chữ Dập & Lớp Phấn Icing</h4>
+                <p>Kẹo cao cấp (Ricola, Cavendish, Haribo) luôn có logo dập nổi sắc nét, hộp thiếc phủ <strong>lớp phấn đường chống dính</strong> -> <strong>Hàng Chuẩn</strong>. Kẹo ướt nhẹp dính tảng, in nhòe nhoẹt -> <strong>Kẹo Nhái</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE GAME: THỬ TÀI THÁM TỬ: THẬT HAY GIẢ? -->
+        <div class="detective-quiz-box">
+          <div class="detective-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+            <div>
+              <span class="home-test-tag" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">🎮 TRẮC NGHIỆM TƯƠNG TÁC THỰC TẾ</span>
+              <h3 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--text-main); margin: 6px 0 4px;">
+                Thử Tài Thám Tử: Bạn Có Nhận Biết Được Hàng Thật Không?
+              </h3>
+              <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+                Bấm chọn xem các tình huống thực tế dưới đây (cả Socola và Kẹo) là Hàng Thật hay Hàng Giả để xem lời giải:
+              </p>
+            </div>
+
+            <!-- Quiz Filter Pills -->
+            <div class="quiz-case-filter" id="quizCaseFilter" style="display: flex; gap: 8px;">
+              <button class="style-tab-btn active" data-case-filter="all" style="padding: 6px 14px; font-size: 0.8rem;">
+                Tất Cả (6 Tình Huống)
+              </button>
+              <button class="style-tab-btn" data-case-filter="chocolate" style="padding: 6px 14px; font-size: 0.8rem;">
+                🍫 Socola
+              </button>
+              <button class="style-tab-btn" data-case-filter="candy" style="padding: 6px 14px; font-size: 0.8rem;">
+                🍬 Kẹo Ngon
+              </button>
+            </div>
+          </div>
+
+          <div class="cases-accordion" id="casesAccordion">
+            <!-- Dynamically populated by js/app.js from AUTHENTICITY_CASES_DATA -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       FLOATING COMPARISON TRAY
+       ======================================================================== -->
+  <aside class="comparison-tray" id="comparisonTray" aria-label="Khay so sánh sản phẩm">
+    <div class="tray-info">
+      <span>⚖️ So sánh (<strong id="trayCount">0/3</strong>):</span>
+      <div class="tray-items" id="trayThumbs"></div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button class="btn-open-compare" id="openCompareBtn">Mở Bảng So Sánh</button>
+      <button class="btn-clear-compare" id="clearCompareBtn" title="Xóa khay so sánh">✕ Xóa</button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       MODALS
+       ======================================================================== -->
+  <!-- Product Detail Modal -->
+  <div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <button class="modal-close-btn" aria-label="Đóng cửa sổ">✕</button>
+      <div id="detailModalContent"></div>
+    </div>
+  </div>
+
+  <!-- Comparison Modal -->
+  <div class="modal-overlay" id="compareModal" role="dialog" aria-modal="true">
+    <div class="modal-card compare-modal-card">
+      <button class="modal-close-btn" aria-label="Đóng cửa sổ">✕</button>
+      <div class="section-header" style="margin-bottom: 20px;">
+        <span class="section-badge">ĐỐI ĐẦU TRỰC DIỆN</span>
+        <h3 style="font-size: 1.8rem;">Bảng So Sánh Chi Tiết</h3>
+      </div>
+      <div class="compare-table-wrap" id="compareTableContainer"></div>
+    </div>
+  </div>
+
+  <!-- Flavor & Candy Quiz Modal -->
+  <div class="modal-overlay" id="quizModal" role="dialog" aria-modal="true">
+    <div class="modal-card quiz-modal-card">
+      <button class="modal-close-btn" aria-label="Đóng cửa sổ">✕</button>
+      
+      <!-- Quiz Switcher Tabs in Modal -->
+      <div class="modal-quiz-tabs" id="modalQuizTabs">
+        <button class="quiz-tab-btn active" data-quiz="chocolate">
+          <span>🍫 Trắc Nghiệm Socola</span>
+        </button>
+        <button class="quiz-tab-btn" data-quiz="candy">
+          <span>🍬 Trắc Nghiệm Chọn Kẹo</span>
+        </button>
+      </div>
+
+      <div id="quizQuestionContainer"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Hạn chế mua hàng đối với tài khoản chưa đăng ký -->
+  <div class="modal-overlay" id="authRequiredModal" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width: 500px; text-align: center; padding: 36px 28px;">
+      <button class="modal-close-btn" aria-label="Đóng cửa sổ">✕</button>
+      <div style="font-size: 3.5rem; margin-bottom: 12px; filter: drop-shadow(0 4px 12px rgba(239, 68, 68, 0.3));">🔒</div>
+      <span class="section-badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">HẠN CHẾ TÀI KHOẢN CHƯA ĐĂNG KÝ</span>
+      <h3 style="font-size: 1.6rem; margin: 12px 0 8px; font-family: var(--font-serif); color: var(--text-main);">
+        Yêu Cầu Tài Khoản Để Đặt Mua
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 20px;">
+        Chức năng đặt mua các dòng socola & kẹo thượng hạng chỉ dành riêng cho <strong>thành viên đã đăng ký tài khoản</strong> nhằm đảm bảo tiêu chuẩn đóng gói lạnh và ưu đãi thành viên.
+      </p>
+
+      <div style="background: rgba(212, 175, 55, 0.08); border: 1px dashed rgba(212, 175, 55, 0.3); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 24px; text-align: left;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--gold-light); margin-bottom: 6px;">🎁 Quyền lợi dành cho thành viên ChocoRank:</div>
+        <ul style="color: var(--text-muted); font-size: 0.82rem; margin: 0; padding-left: 18px; line-height: 1.6;">
+          <li>Mở khóa quyền đặt mua toàn bộ 20 dòng socola & kẹo thượng hạng</li>
+          <li>Giảm ngay 10% cho đơn hàng đầu tiên (áp dụng cả Marou, Royce, Godiva)</li>
+          <li>Lưu trữ danh sách yêu thích và lịch sử trắc nghiệm hương vị</li>
+        </ul>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a href="auth.html" class="btn-primary" style="text-decoration: none; justify-content: center; padding: 12px;">
+          <span>🔑 Đăng Nhập / Đăng Ký Tài Khoản Ngay</span>
+        </a>
+        <button type="button" class="btn-reset-filters" id="modalQuickGuestLoginBtn" style="justify-content: center; padding: 10px; background: rgba(255,255,255,0.06);">
+          <span>⚡ Đăng Nhập Nhanh Khách Hàng (1-Click) Để Mua</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Xác nhận đặt mua giả lập cho thành viên đã đăng nhập -->
+  <div class="modal-overlay" id="mockOrderModal" role="dialog" aria-modal="true">
+    <div class="modal-card" style="max-width: 520px; padding: 32px 28px;">
+      <button class="modal-close-btn" aria-label="Đóng cửa sổ">✕</button>
+      <div class="section-header" style="text-align: left; margin-bottom: 18px;">
+        <span class="section-badge">🛍️ ĐẶT MUA THÀNH VIÊN</span>
+        <h3 id="orderItemTitle" style="font-size: 1.5rem; margin-top: 6px;">Xác Nhận Đơn Đặt Mua</h3>
+      </div>
+
+      <div id="orderItemContent" style="margin-bottom: 24px;"></div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+        <button type="button" class="btn-reset-filters" id="cancelOrderBtn">Đóng</button>
+        <a href="checkout.html" class="btn-view-client" style="text-decoration: none; padding: 10px 18px;">
+          <span>🛍️ Mở Trang Thanh Toán</span>
+        </a>
+        <button type="button" class="btn-primary" id="confirmOrderBtn" style="padding: 10px 22px;">
+          <span>✓ Đặt Nhanh (Giả Lập)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trusted Buying Directory Modal (Nơi Mua Uy Tín) -->
+  <div class="modal-overlay" id="buyGuideModal" role="dialog" aria-modal="true">
+    <div class="modal-card buy-guide-modal-card">
+      <button class="modal-close-btn" aria-label="Đóng cửa sổ">✕</button>
+      
+      <div class="section-header" style="margin-bottom: 24px; text-align: left;">
+        <span class="section-badge" style="background: rgba(212, 175, 55, 0.15); color: var(--gold-light);">🛒 HƯỚNG DẪN MUA HÀNG CHÍNH HÃNG</span>
+        <h3 style="font-size: 1.8rem; margin-top: 6px;">Địa Chỉ & Kênh Mua Socola / Kẹo Uy Tín</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 6px;">
+          Tổng hợp các kênh phân phối chính ngạch, chuỗi showroom cao cấp và sàn thương mại điện tử đáng tin cậy nhất tại Việt Nam.
+        </p>
+      </div>
+
+      <div class="buy-guide-grid">
+        <!-- Col 1: Showroom & Boutique Cao Cấp -->
+        <div class="buy-guide-col">
+          <div class="buy-guide-col-header">
+            <span class="buy-col-icon">🍫</span>
+            <h4>Kênh Showroom & Cửa Hàng Chuyên Dụng</h4>
+          </div>
+          <div class="buy-store-list">
+            <div class="buy-store-card">
+              <div class="store-info">
+                <strong>Showroom Thủ Công (Bean-to-Bar)</strong>
+                <p>Nơi bảo quản socola nguyên chất với nhiệt độ chuẩn 18°C – 20°C, giữ trọn vẹn hương thơm bơ cacao tự nhiên.</p>
+              </div>
+              <span class="store-tag tag-official">Chuẩn Thủ Công</span>
+            </div>
+
+            <div class="buy-store-card">
+              <div class="store-info">
+                <strong>Cửa Hàng Thực Phẩm Nhập Khẩu</strong>
+                <p>Phân phối các dòng socola đen, socola hạt phỉ và kẹo thảo mộc nhập khẩu với tem phụ và nguồn gốc rõ ràng.</p>
+              </div>
+              <span class="store-tag tag-import">Tiêu Chuẩn Quốc Tế</span>
+            </div>
+
+            <div class="buy-store-card">
+              <div class="store-info">
+                <strong>Quầy Hàng Bảo Quản Lạnh Chuyên Biệt</strong>
+                <p>Dành riêng cho socola tươi (Nama) và truffles nhạy cảm với nhiệt độ, cần duy trì dưới 10°C liên tục.</p>
+              </div>
+              <span class="store-tag tag-nama">Bảo Quản Lạnh</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: Sàn TMĐT & Siêu Thị Tiện Lợi -->
+        <div class="buy-guide-col">
+          <div class="buy-guide-col-header">
+            <span class="buy-col-icon">🛒</span>
+            <h4>Chuỗi Bách Hóa & Đặt Giao Tận Nơi</h4>
+          </div>
+          <div class="buy-store-list">
+            <div class="buy-store-card">
+              <div class="store-info">
+                <strong>Dịch Vụ Giao Hỏa Tốc Thùng Xốp Đá Gel</strong>
+                <p>Đảm bảo bánh kẹo và socola không bị sốc nhiệt hay chảy biến dạng khi vận chuyển trong thời tiết nóng.</p>
+              </div>
+              <span class="store-tag tag-mall">Giao Mát An Toàn</span>
+            </div>
+
+            <div class="buy-store-card">
+              <div class="store-info">
+                <strong>Hệ Thống Phân Phối Trực Tuyến</strong>
+                <p>Các loại kẹo dẻo hoa quả, kẹo caramel và kẹo dừa date mới nhất, đóng gói bao bì nguyên vẹn từ nhà sản xuất.</p>
+              </div>
+              <span class="store-tag tag-fast">Date Mới Nhất</span>
+            </div>
+
+            <div class="buy-store-card">
+              <div class="store-info">
+                <strong>Kiểm Định Chất Lượng Đầu Vào</strong>
+                <p>Cam kết 100% nguyên liệu đạt chuẩn an toàn vệ sinh thực phẩm, không hóa chất độc hại hay chất bảo quản cấm.</p>
+              </div>
+              <span class="store-tag tag-tiki">Kiểm Định Kỹ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buyer Tips Banner -->
+      <div class="buyer-tips-box">
+        <h5 style="color: var(--gold-light); margin-bottom: 8px; font-size: 1rem;">💡 Lưu Ý Quan Trọng Khi Mua Socola & Kẹo Trực Tuyến:</h5>
+        <ul style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.7; padding-left: 20px; margin: 0;">
+          <li><strong>Mùa nắng nóng:</strong> Nên chọn hình thức <em>Giao Hỏa Tốc (1-2 giờ)</em> hoặc dịch vụ giao lạnh để socola không bị chảy mềm bơ cacao trong quá trình vận chuyển.</li>
+          <li><strong>Bảo quản sau nhận hàng:</strong> Khi nhận được socola, hãy để nguyên hộp vào ngăn mát tủ lạnh (khoảng 16°C – 20°C) trong 15-20 phút trước khi thưởng thức để socola lấy lại độ giòn giòn tan chuẩn mực.</li>
+          <li><strong>Hạn sử dụng:</strong> Đối với kẹo dẻo và socola tươi (Nama), luôn kiểm tra tem phụ tiếng Việt và hạn sử dụng (EXP) in trên bao bì để đảm bảo độ tươi mới ngon nhất.</li>
+        </ul>
+      </div>
+
+      <div style="margin-top: 24px; text-align: center;">
+        <button class="btn-primary" onclick="document.getElementById('buyGuideModal').classList.remove('active')">
+          ✓ Đã Hiểu & Quay Lại Bảng Xếp Hạng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="logo" style="margin-bottom: 16px;">
+            <div class="logo-icon">🍫</div>
+            <div class="logo-text">
+              <span class="logo-title">Choco<span class="text-gold">Rank</span></span>
+              <span class="logo-subtitle">Tinh Hoa Socola Thượng Hạng</span>
+            </div>
+          </div>
+          <p style="font-size: 0.88rem; line-height: 1.6; max-width: 360px;">
+            Chuyên trang thống kê, thẩm định và xếp hạng các dòng socola danh tiếng nhất trên toàn cầu. Đem lại góc nhìn khách quan, khoa học cho người đam mê ẩm thực hảo hạng.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Dòng Socola Tiêu Biểu</h5>
+          <ul class="footer-links">
+            <li><a href="#rankings">Socola Đen 70% - 85%</a></li>
+            <li><a href="#rankings">Socola Tươi Nama Nhật Bản</a></li>
+            <li><a href="#rankings">Socola Bean-to-Bar Marou</a></li>
+            <li><a href="#rankings">Praline Hạt Phỉ Ferrero & Guylian</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Tiêu Chí Đánh Giá</h5>
+          <ul class="footer-links">
+            <li><a href="#statistics">Độ Mịn Bơ Cacao Tinh Khiết</a></li>
+            <li><a href="#statistics">Tỉ Lệ Giá Trị / Giá Bán (P/P)</a></li>
+            <li><a href="#statistics">Hương Thơm Nếm Thử Tự Nhiên</a></li>
+            <li><a href="#guide">Quy Trình Kiểm Tra 5 Giác Quan</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Về Chúng Tôi</h5>
+          <ul class="footer-links">
+            <li><a href="#">Phương Pháp Chấm Điểm</a></li>
+            <li><a href="#">Gửi Sản Phẩm Thẩm Định</a></li>
+            <li><a href="#">Chính Sách Bảo Mật</a></li>
+            <li><a href="#">Liên Hệ Ban Cố Vấn</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2025 - 2026 ChocoRank. Tất cả dữ liệu đánh giá và hình ảnh được biên soạn chuyên nghiệp cho mục đích tham khảo và khám phá ẩm thực.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

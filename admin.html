@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khu Quản Trị Hệ Thống - ChocoRank Admin Portal</title>
+  <meta name="description" content="Trung tâm quản trị hệ thống ChocoRank: Quản lý danh mục socola, thống kê bình chọn, quản lý tài khoản thành viên.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Admin Dashboard Specific Layout & Elements */
+    .admin-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-main);
+    }
+
+    .admin-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--bg-glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .admin-nav-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .admin-badge-portal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-view-client {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .btn-view-client:hover {
+      background: rgba(212, 175, 55, 0.18);
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+    }
+
+    .admin-user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .admin-main-container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+      flex: 1;
+    }
+
+    /* KPI Summary Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-glass-border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--gold-primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .kpi-icon-wrap {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .kpi-data h4 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 0 0 4px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kpi-number {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .kpi-sub {
+      font-size: 0.76rem;
+      color: var(--success);
+      margin-top: 4px;
+    }
+
+    /* Admin Navigation Tabs */
+    .admin-section-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 24px;
+      padding-bottom: 4px;
+    }
+
+    .admin-tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .admin-tab-btn.active {
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--gold-light);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    /* Table Toolbar */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      max-width: 600px;
+    }
+
+    .admin-search-input {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    .admin-search-input:focus {
+      border-color: var(--gold-primary);
+    }
+
+    .btn-add-product {
+      padding: 10px 18px;
+      background: linear-gradient(135deg, var(--gold-primary), #b38f28);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #0c0806;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-add-product:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+    }
+
+    /* Admin Data Table */
+    .admin-table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-glass-border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    .admin-table th {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 14px 16px;
+      color: var(--gold-light);
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      white-space: nowrap;
+    }
+
+    .admin-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .admin-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .table-prod-img {
+      width: 46px;
+      height: 46px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .table-prod-name {
+      font-weight: 700;
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .table-prod-origin {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+
+    .badge-tag-choco {
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--gold-light);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    .badge-tag-candy {
+      background: rgba(226, 135, 67, 0.15);
+      color: #f7a361;
+      border: 1px solid rgba(226, 135, 67, 0.3);
+    }
+
+    .action-btn-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-row-action {
+      padding: 6px 10px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: var(--transition);
+    }
+
+    .btn-row-action:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+    }
+
+    .btn-row-delete:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Modal Access Denied */
+    .access-denied-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(12, 8, 6, 0.94);
+      backdrop-filter: blur(16px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .access-denied-overlay.active {
+      display: flex;
+    }
+
+    .access-denied-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(239, 68, 68, 0.15);
+      animation: fadeInCard 0.3s ease;
+    }
+  </style>
+</head>
+<body class="admin-layout">
+
+  <!-- ========================================================================
+       ADMIN NAVIGATION HEADER
+       ======================================================================== -->
+  <header class="admin-header">
+    <div class="admin-nav-wrap">
+      <div class="admin-brand">
+        <a href="index.html" class="logo" style="text-decoration: none;">
+          <div class="logo-icon">🍫</div>
+          <div class="logo-text">
+            <span class="logo-title">Choco<span class="text-gold">Rank</span></span>
+          </div>
+        </a>
+        <span class="admin-badge-portal">🛡️ Khu Quản Trị Hệ Thống</span>
+      </div>
+
+      <div class="admin-actions-bar">
+        <a href="index.html" class="btn-view-client" title="Trở về giao diện người dùng">
+          <span>🌐 Trang Khách</span>
+        </a>
+
+        <button class="theme-toggle-btn" id="themeToggleBtn" title="Đổi giao diện Sáng / Tối">
+          🌙
+        </button>
+
+        <div class="admin-user-pill">
+          <span id="adminAvatar">🛡️</span>
+          <span id="adminName" style="font-weight: 700; font-size: 0.88rem; color: var(--gold-light);">Admin</span>
+        </div>
+
+        <button class="nav-logout-btn" id="adminLogoutBtn" title="Đăng xuất khỏi tài khoản quản trị">
+          <span>🚪 Đăng Xuất</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN DASHBOARD
+       ======================================================================== -->
+  <main class="admin-main-container">
+    
+    <!-- KPI Header Overview -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap">🍫</div>
+        <div class="kpi-data">
+          <h4>Tổng Dòng Sản Phẩm</h4>
+          <p class="kpi-number" id="kpiTotalProducts">20</p>
+          <span class="kpi-sub">12 Socola • 8 Loại Kẹo</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap">⭐</div>
+        <div class="kpi-data">
+          <h4>Điểm Đánh Giá TB</h4>
+          <p class="kpi-number">9.58 <span style="font-size: 1rem; color: var(--text-muted);">/ 10</span></p>
+          <span class="kpi-sub">Đạt chuẩn thẩm định quốc tế</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap">👥</div>
+        <div class="kpi-data">
+          <h4>Thành Viên Đăng Ký</h4>
+          <p class="kpi-number" id="kpiTotalUsers">3</p>
+          <span class="kpi-sub" id="kpiNewUsersSub">+1 vừa gia nhập hôm nay</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-wrap">📊</div>
+        <div class="kpi-data">
+          <h4>Lượt Bình Chọn</h4>
+          <p class="kpi-number">48.520</p>
+          <span class="kpi-sub">Tỉ lệ phản hồi tích cực 98.4%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Switcher -->
+    <div class="admin-section-tabs">
+      <button class="admin-tab-btn active" id="tabProductsBtn">
+        <span>🍫 Quản Lý Sản Phẩm (20)</span>
+      </button>
+      <button class="admin-tab-btn" id="tabUsersBtn">
+        <span>👥 Quản Lý Thành Viên</span>
+      </button>
+      <button class="admin-tab-btn" id="tabLogsBtn">
+        <span>📝 Nhật Ký Hoạt Động</span>
+      </button>
+      <button class="admin-tab-btn" id="tabOrdersBtn">
+        <span>📦 Đơn Hàng Đã Đặt (<span id="adminOrderBadge">0</span>)</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: PRODUCT MANAGEMENT -->
+    <section id="sectionProducts">
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="admin-search-input" id="adminProductSearch" placeholder="🔍 Tìm kiếm nhanh theo tên sản phẩm, thương hiệu, quốc gia...">
+          <select id="adminCategoryFilter" class="select-control" style="max-width: 180px;">
+            <option value="all">Tất cả danh mục</option>
+            <option value="chocolate">Chỉ Socola</option>
+            <option value="candy">Chỉ Kẹo</option>
+          </select>
+        </div>
+        <button class="btn-add-product" id="openAddProductModalBtn">
+          <span>+ Thêm Món Mới</span>
+        </button>
+      </div>
+
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;">Ảnh</th>
+              <th>Tên Sản Phẩm</th>
+              <th>Phân Loại</th>
+              <th>Thương Hiệu & Xuất Xứ</th>
+              <th>% Cacao / Đặc Trưng</th>
+              <th>Giá Tham Khảo</th>
+              <th>Điểm Số</th>
+              <th style="text-align: right;">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="adminProductTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 2: USER MANAGEMENT -->
+    <section id="sectionUsers" style="display: none;">
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">Avatar</th>
+              <th>Họ Và Tên</th>
+              <th>Email</th>
+              <th>Vai Trò (Role)</th>
+              <th>Ngày Đăng Ký</th>
+              <th>Trạng Thái</th>
+              <th style="text-align: right;">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="adminUserTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: ACTIVITY LOGS -->
+    <section id="sectionLogs" style="display: none;">
+      <div class="admin-table-card" style="padding: 20px;">
+        <h4 style="color: var(--gold-light); margin-bottom: 16px;">📜 Lịch Sử Thao Tác Hệ Thống Gần Nhất</h4>
+        <div id="logsContainer" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem;">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ORDERS MANAGEMENT -->
+    <section id="sectionOrders" style="display: none;">
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="admin-search-input" id="adminOrderSearch" placeholder="🔍 Tìm kiếm theo mã đơn (#CR-...), tên khách, số điện thoại...">
+        </div>
+        <button type="button" class="btn-reset-filters" id="refreshOrdersBtn">
+          <span>🔄 Tải Lại Đơn</span>
+        </button>
+      </div>
+
+      <div class="admin-table-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Mã Đơn</th>
+              <th>Thời Gian</th>
+              <th>Khách Hàng & SĐT</th>
+              <th>Địa Chỉ Nhận</th>
+              <th>Món Đã Đặt</th>
+              <th>Thanh Toán</th>
+              <th>Tổng Tiền</th>
+              <th>Trạng Thái</th>
+            </tr>
+          </thead>
+          <tbody id="adminOrdersTableBody">
+            <!-- Dynamic -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL: ADD/EDIT PRODUCT (MOCK CRUD)
+       ======================================================================== -->
+  <div class="modal-overlay" id="productFormModal">
+    <div class="modal-card" style="max-width: 560px;">
+      <button class="modal-close-btn" id="closeProdModalBtn">✕</button>
+      <div class="section-header" style="margin-bottom: 20px; text-align: left;">
+        <span class="section-badge">QUẢN TRỊ NỘI DUNG</span>
+        <h3 id="prodModalTitle" style="font-size: 1.5rem; margin-top: 4px;">Thêm Socola / Kẹo Mới</h3>
+      </div>
+
+      <form id="adminProductForm">
+        <input type="hidden" id="formProdId">
+        
+        <div class="form-group">
+          <label class="form-label" for="formProdName">Tên sản phẩm *</label>
+          <input type="text" class="form-input" id="formProdName" required placeholder="Ví dụ: Marou Tiền Giang 70%">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="formProdType">Loại món</label>
+            <select class="form-input" id="formProdType">
+              <option value="chocolate">Socola Thượng Hạng</option>
+              <option value="candy">Kẹo Đặc Sản / Cao Cấp</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formProdBrand">Thương hiệu</label>
+            <input type="text" class="form-input" id="formProdBrand" placeholder="Marou, Lindt, Royce'...">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="formProdPrice">Giá bán (VNĐ)</label>
+            <input type="text" class="form-input" id="formProdPrice" placeholder="135.000₫">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formProdRating">Điểm chuyên môn (1-10)</label>
+            <input type="number" step="0.1" min="1" max="10" class="form-input" id="formProdRating" value="9.5">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="formProdOrigin">Xuất xứ quốc gia</label>
+          <input type="text" class="form-input" id="formProdOrigin" placeholder="Việt Nam, Thụy Sĩ, Nhật Bản...">
+        </div>
+
+        <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-reset-filters" id="cancelProdModalBtn">Hủy Bỏ</button>
+          <button type="submit" class="btn-primary" style="padding: 10px 24px;">Lưu Sản Phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: ACCESS DENIED (GUARD)
+       ======================================================================== -->
+  <div class="access-denied-overlay" id="accessDeniedModal">
+    <div class="access-denied-card">
+      <span style="font-size: 3.5rem; display: block; margin-bottom: 12px;">🔒</span>
+      <h2 style="font-family: var(--font-serif); font-size: 1.8rem; margin: 0 0 10px 0; color: #ef4444;">
+        Quyền Truy Cập Bị Giới Hạn!
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
+        Khu vực Quản Trị Hệ Thống chỉ dành riêng cho tài khoản có quyền <strong>Ban Quản Trị (Admin)</strong>.
+        Tài khoản hiện tại của bạn không đủ đặc quyền để truy cập trang này.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-primary" id="guardQuickAdminLoginBtn" style="background: linear-gradient(135deg, var(--gold-primary), #b38f28);">
+          <span>🛡️ Đăng Nhập Tài Khoản Admin Ngay (1-Click)</span>
+        </button>
+        <a href="auth.html?mode=register-admin" style="font-size: 0.85rem; color: #f87171; text-decoration: none; padding: 6px;">
+          <span>🛡️ Đăng Ký Tài Khoản Ban Quản Trị (Cần Mã Ủy Quyền) →</span>
+        </a>
+        <a href="index.html" class="btn-view-client" style="justify-content: center; padding: 12px;">
+          <span>🌐 Quay Lại Trang Khách (index.html)</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Security Guard Check
+    function checkAdminAccess() {
+      const currentUser = getCurrentUser();
+      const accessModal = document.getElementById('accessDeniedModal');
+
+      if (!currentUser || currentUser.role !== 'admin') {
+        accessModal.classList.add('active');
+        return false;
+      }
+
+      // Update admin UI info
+      document.getElementById('adminName').textContent = currentUser.name;
+      document.getElementById('adminAvatar').textContent = currentUser.avatar || '🛡️';
+      accessModal.classList.remove('active');
+      return true;
+    }
+
+    // 1-Click login as admin from Guard
+    document.getElementById('guardQuickAdminLoginBtn').addEventListener('click', () => {
+      loginUser('admin@chocorank.com', 'admin123');
+      window.location.reload();
+    });
+
+    // Admin Logout
+    document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+      logoutUser();
+      window.location.href = 'auth.html';
+    });
+
+    // Theme toggle
+    const themeBtn = document.getElementById('themeToggleBtn');
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      themeBtn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+    });
+
+    // Toast helper
+    function showToast(msg, type = 'success') {
+      const cont = document.getElementById('toastContainer');
+      if (!cont) return;
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✓' : 'ℹ️'} ${msg}</span>`;
+      cont.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+
+    // Local copy of products for mock CRUD operations
+    let adminProducts = [];
+    if (typeof CHOCOLATE_DATA !== 'undefined') {
+      adminProducts = JSON.parse(JSON.stringify(CHOCOLATE_DATA));
+    }
+
+    // Audit Logs
+    const auditLogs = [
+      { time: '08:45', action: 'Hệ thống tự động đồng bộ 20 dòng sản phẩm chất lượng cao.' },
+      { time: '08:30', action: 'Tài khoản admin@chocorank.com đăng nhập thành công vào phiên làm việc.' },
+      { time: '08:15', action: 'Marou Đắk Lắk 70% được duyệt giữ vị trí TOP 1 Bảng xếp hạng toàn diện.' }
+    ];
+
+    function renderAuditLogs() {
+      const cont = document.getElementById('logsContainer');
+      if (!cont) return;
+      cont.innerHTML = auditLogs.map(log => `
+        <div style="display: flex; align-items: center; gap: 14px; padding: 10px; background: var(--bg-surface); border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
+          <span style="color: var(--gold-light); font-weight: 700; font-family: monospace;">[${log.time}]</span>
+          <span style="color: var(--text-main);">${log.action}</span>
+        </div>
+      `).join('');
+    }
+
+    // Render Product Table
+    function renderProductTable() {
+      const tbody = document.getElementById('adminProductTableBody');
+      const searchVal = (document.getElementById('adminProductSearch').value || '').trim().toLowerCase();
+      const catVal = document.getElementById('adminCategoryFilter').value;
+
+      let filtered = adminProducts.filter(item => {
+        const matchSearch = !searchVal || item.name.toLowerCase().includes(searchVal) ||
+                            item.brand.toLowerCase().includes(searchVal) ||
+                            (item.origin && item.origin.toLowerCase().includes(searchVal));
+        const matchCat = catVal === 'all' || item.type === catVal;
+        return matchSearch && matchCat;
+      });
+
+      document.getElementById('kpiTotalProducts').textContent = adminProducts.length;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Không tìm thấy sản phẩm nào phù hợp.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        const isChoco = item.type !== 'candy';
+        const typeBadge = isChoco 
+          ? `<span class="badge-tag badge-tag-choco">🍫 Socola</span>`
+          : `<span class="badge-tag badge-tag-candy">🍬 Kẹo Ngon</span>`;
+
+        const cocoaOrFeature = isChoco 
+          ? `<strong style="color: var(--gold-light);">${item.cocoaPercentage}% Cacao</strong>`
+          : `<span style="color: var(--text-muted);">${item.texture || 'Kẹo dẻo/ngậm'}</span>`;
+
+        return `
+          <tr id="row-${item.id}">
+            <td>
+              <img src="${item.image}" alt="${item.name}" class="table-prod-img">
+            </td>
+            <td>
+              <span class="table-prod-name">${item.name}</span>
+              <span style="font-size: 0.74rem; color: var(--gold-light);">#${item.rank || '-'} Toàn quốc</span>
+            </td>
+            <td>${typeBadge}</td>
+            <td>
+              <span>${item.brand}</span>
+              <span class="table-prod-origin">• ${item.origin || 'Nhập khẩu'}</span>
+            </td>
+            <td>${cocoaOrFeature}</td>
+            <td style="font-weight: 700; color: var(--text-main);">${item.priceFormatted || item.price}</td>
+            <td>
+              <span style="color: var(--gold-light); font-weight: 800;">★ ${item.score || 9.5}</span>
+            </td>
+            <td style="text-align: right;">
+              <div class="action-btn-cell" style="justify-content: flex-end;">
+                <button class="btn-row-action" onclick="editProduct('${item.id}')" title="Chỉnh sửa">✏️ Sửa</button>
+                <button class="btn-row-action btn-row-delete" onclick="deleteProduct('${item.id}')" title="Xóa">🗑️ Xóa</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render User Management Table
+    function renderUserTable() {
+      const tbody = document.getElementById('adminUserTableBody');
+      const users = getAllUsers();
+      document.getElementById('kpiTotalUsers').textContent = users.length;
+
+      tbody.innerHTML = users.map(u => {
+        const isAdmin = u.role === 'admin';
+        const roleLabel = isAdmin 
+          ? `<span class="badge-tag" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">🛡️ Quản Trị Viên (Admin)</span>`
+          : `<span class="badge-tag" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">👤 Khách Hàng (User)</span>`;
+
+        return `
+          <tr>
+            <td style="font-size: 1.4rem;">${u.avatar || '🍫'}</td>
+            <td>
+              <strong>${u.name}</strong>
+              <div style="font-size: 0.76rem; color: var(--text-muted);">${u.title || 'Thành viên'}</div>
+            </td>
+            <td style="color: var(--text-gold);">${u.email}</td>
+            <td>${roleLabel}</td>
+            <td style="color: var(--text-muted);">${u.joinedDate || '19/09/2026'}</td>
+            <td><span style="color: var(--success); font-weight: 600;">● Hoạt động</span></td>
+            <td style="text-align: right;">
+              ${!isAdmin ? `<button class="btn-row-action" onclick="alert('Đã gửi thông báo ưu đãi đến ${u.email}!');">✉️ Gửi Ưu Đãi</button>` : '<span style="font-size: 0.75rem; color: var(--text-muted);">Root System</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Delete Product Mock
+    window.deleteProduct = function(id) {
+      const idx = adminProducts.findIndex(p => p.id === id);
+      if (idx !== -1) {
+        const name = adminProducts[idx].name;
+        if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" khỏi danh sách quản lý?`)) {
+          adminProducts.splice(idx, 1);
+          renderProductTable();
+          auditLogs.unshift({
+            time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+            action: `Admin đã xóa sản phẩm: ${name}`
+          });
+          renderAuditLogs();
+          showToast(`Đã xóa sản phẩm "${name}" thành công!`, 'success');
+        }
+      }
+    };
+
+    // Edit Product Mock
+    window.editProduct = function(id) {
+      const item = adminProducts.find(p => p.id === id);
+      if (!item) return;
+
+      document.getElementById('formProdId').value = item.id;
+      document.getElementById('formProdName').value = item.name;
+      document.getElementById('formProdType').value = item.type || 'chocolate';
+      document.getElementById('formProdBrand').value = item.brand;
+      document.getElementById('formProdPrice').value = item.priceFormatted || item.price;
+      document.getElementById('formProdRating').value = item.score || 9.5;
+      document.getElementById('formProdOrigin').value = item.origin || '';
+
+      document.getElementById('prodModalTitle').textContent = `Chỉnh Sửa: ${item.name}`;
+      document.getElementById('productFormModal').classList.add('active');
+    };
+
+    // Product Modal handlers
+    const prodModal = document.getElementById('productFormModal');
+    document.getElementById('openAddProductModalBtn').addEventListener('click', () => {
+      document.getElementById('adminProductForm').reset();
+      document.getElementById('formProdId').value = '';
+      document.getElementById('prodModalTitle').textContent = 'Thêm Socola / Kẹo Mới';
+      prodModal.classList.add('active');
+    });
+
+    document.getElementById('closeProdModalBtn').addEventListener('click', () => prodModal.classList.remove('active'));
+    document.getElementById('cancelProdModalBtn').addEventListener('click', () => prodModal.classList.remove('active'));
+
+    // Handle Add / Update Product Submit
+    document.getElementById('adminProductForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('formProdId').value;
+      const name = document.getElementById('formProdName').value.trim();
+      const type = document.getElementById('formProdType').value;
+      const brand = document.getElementById('formProdBrand').value.trim() || 'Thủ Công';
+      const price = document.getElementById('formProdPrice').value.trim() || '150.000₫';
+      const score = parseFloat(document.getElementById('formProdRating').value) || 9.5;
+      const origin = document.getElementById('formProdOrigin').value.trim() || 'Việt Nam';
+
+      if (id) {
+        // Update existing
+        const item = adminProducts.find(p => p.id === id);
+        if (item) {
+          item.name = name;
+          item.type = type;
+          item.brand = brand;
+          item.priceFormatted = price;
+          item.score = score;
+          item.origin = origin;
+          showToast(`Đã cập nhật sản phẩm "${name}"!`, 'success');
+        }
+      } else {
+        // Add new
+        const newProd = {
+          id: 'prod-' + Date.now(),
+          name: name,
+          type: type,
+          brand: brand,
+          priceFormatted: price,
+          score: score,
+          origin: origin,
+          cocoaPercentage: type === 'chocolate' ? 70 : 0,
+          image: type === 'chocolate' ? 'assets/images/dark_chocolate.jpg' : 'assets/images/hichew_fruit.jpg',
+          rank: adminProducts.length + 1
+        };
+        adminProducts.unshift(newProd);
+        auditLogs.unshift({
+          time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+          action: `Admin vừa tạo mới sản phẩm: ${name}`
+        });
+        showToast(`Đã thêm mới thành công "${name}"!`, 'success');
+      }
+
+      prodModal.classList.remove('active');
+      renderProductTable();
+      renderAuditLogs();
+    });
+
+    // Search and filter listeners
+    document.getElementById('adminProductSearch').addEventListener('input', renderProductTable);
+    document.getElementById('adminCategoryFilter').addEventListener('change', renderProductTable);
+
+    // Tab Switching
+    const tabProdBtn = document.getElementById('tabProductsBtn');
+    const tabUsersBtn = document.getElementById('tabUsersBtn');
+    const tabLogsBtn = document.getElementById('tabLogsBtn');
+    const tabOrdersBtn = document.getElementById('tabOrdersBtn');
+
+    const secProd = document.getElementById('sectionProducts');
+    const secUsers = document.getElementById('sectionUsers');
+    const secLogs = document.getElementById('sectionLogs');
+    const secOrders = document.getElementById('sectionOrders');
+
+    function resetTabs() {
+      [tabProdBtn, tabUsersBtn, tabLogsBtn, tabOrdersBtn].forEach(b => b?.classList.remove('active'));
+      [secProd, secUsers, secLogs, secOrders].forEach(s => { if (s) s.style.display = 'none'; });
+    }
+
+    tabProdBtn?.addEventListener('click', () => {
+      resetTabs();
+      tabProdBtn.classList.add('active');
+      if (secProd) secProd.style.display = 'block';
+    });
+
+    tabUsersBtn?.addEventListener('click', () => {
+      resetTabs();
+      tabUsersBtn.classList.add('active');
+      if (secUsers) secUsers.style.display = 'block';
+      renderUserTable();
+    });
+
+    tabLogsBtn?.addEventListener('click', () => {
+      resetTabs();
+      tabLogsBtn.classList.add('active');
+      if (secLogs) secLogs.style.display = 'block';
+      renderAuditLogs();
+    });
+
+    tabOrdersBtn?.addEventListener('click', () => {
+      resetTabs();
+      tabOrdersBtn.classList.add('active');
+      if (secOrders) secOrders.style.display = 'block';
+      renderOrdersTable();
+    });
+
+    function renderOrdersTable(query = '') {
+      const tbody = document.getElementById('adminOrdersTableBody');
+      const badge = document.getElementById('adminOrderBadge');
+      if (!tbody) return;
+
+      const raw = localStorage.getItem('chocorank_orders');
+      let orders = [];
+      try { orders = raw ? JSON.parse(raw) : []; } catch(e) {}
+
+      if (badge) badge.textContent = orders.length;
+
+      let filtered = orders;
+      if (query.trim()) {
+        const q = query.toLowerCase();
+        filtered = orders.filter(o => 
+          (o.orderId && o.orderId.toLowerCase().includes(q)) ||
+          (o.customer?.name && o.customer.name.toLowerCase().includes(q)) ||
+          (o.customer?.phone && o.customer.phone.includes(q))
+        );
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
+              Chưa có đơn hàng nào được đặt hoặc không tìm thấy đơn phù hợp.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(o => `
+        <tr>
+          <td><strong style="color: var(--gold-light); font-family: monospace;">${o.orderId}</strong></td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">${o.date || 'Vừa xong'}</td>
+          <td>
+            <strong>${o.customer?.name || 'Khách vãng lai'}</strong>
+            <div style="font-size: 0.78rem; color: var(--gold-light);">${o.customer?.phone || ''}</div>
+          </td>
+          <td style="font-size: 0.82rem; max-width: 200px;">${o.customer?.address || 'Tại cửa hàng'}</td>
+          <td style="font-size: 0.82rem;">
+            ${(o.items || []).map(i => `<div>• ${i.name} <strong>x${i.quantity || 1}</strong></div>`).join('')}
+          </td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">${o.paymentMethod || 'COD'}</td>
+          <td><strong style="color: var(--gold-light);">${formatCurrency(o.grandTotal || 0)}</strong></td>
+          <td>
+            <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 0.75rem; padding: 3px 8px; border-radius: var(--radius-full); font-weight: 700;">
+              ✓ ${o.status || 'Chờ giao hàng'}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('adminOrderSearch')?.addEventListener('input', (e) => {
+      renderOrdersTable(e.target.value);
+    });
+
+    document.getElementById('refreshOrdersBtn')?.addEventListener('click', () => {
+      renderOrdersTable();
+      showToast('Đã làm mới danh sách đơn hàng!', 'info');
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      if (checkAdminAccess()) {
+        renderProductTable();
+        renderUserTable();
+        renderAuditLogs();
+        renderOrdersTable();
+      }
+    });
+  </script>
+</body>
+</html>
