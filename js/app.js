@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. Render các thành phần giao diện với dữ liệu trực tuyến từ Supabase
+    initHeaderNavSlider();
     renderHeroHighlight();
     renderStatistics();
     renderCategoryPills();
@@ -730,6 +731,158 @@ document.addEventListener('DOMContentLoaded', () => {
       const card = e.target.closest('.slider-item-card');
       if (card && card.dataset.id) {
         openDetailModal(card.dataset.id);
+      }
+    });
+  }
+
+  // =========================================================================
+  // THANH KÉO TÙY CHỌN GIAO DIỆN TỪ TRÁI QUA PHẢI (HEADER NAV SLIDER BAR)
+  // Kéo qua các phần chọn để tới Đăng Nhập & Đăng Ký
+  // =========================================================================
+  function initHeaderNavSlider() {
+    const navTrack = document.getElementById('headerNavTrack');
+    const scrollLeftBtn = document.getElementById('navScrollLeftBtn');
+    const scrollRightBtn = document.getElementById('navScrollRightBtn');
+    const sliderTrack = document.getElementById('navSliderTrack');
+    const sliderThumb = document.getElementById('navSliderThumb');
+    const sliderFill = document.getElementById('navSliderFill');
+    const jumpToAuthBtn = document.getElementById('jumpToAuthBtn');
+    const jumpToStartBtn = document.getElementById('jumpToStartBtn');
+
+    if (!navTrack) return;
+
+    // Cập nhật vị trí thanh trượt nằm ngang (Thumb & Fill) theo vị trí cuộn
+    const syncThumbWithScroll = () => {
+      const maxScroll = navTrack.scrollWidth - navTrack.clientWidth;
+      const ratio = maxScroll > 0 ? Math.min(1, Math.max(0, navTrack.scrollLeft / maxScroll)) : 0;
+      const pct = ratio * 100;
+      if (sliderThumb) {
+        sliderThumb.style.left = `${pct}%`;
+        sliderThumb.setAttribute('aria-valuenow', Math.round(pct));
+      }
+      if (sliderFill) {
+        sliderFill.style.width = `${pct}%`;
+      }
+    };
+
+    navTrack.addEventListener('scroll', syncThumbWithScroll, { passive: true });
+    window.addEventListener('resize', syncThumbWithScroll);
+    setTimeout(syncThumbWithScroll, 200);
+
+    // 1. Nút mũi tên trái/phải cuộn nhanh
+    scrollRightBtn?.addEventListener('click', () => {
+      navTrack.scrollBy({ left: 240, behavior: 'smooth' });
+    });
+    scrollLeftBtn?.addEventListener('click', () => {
+      navTrack.scrollBy({ left: -240, behavior: 'smooth' });
+    });
+
+    // 2. Nhảy nhanh tới mục Đăng Nhập & Đăng Ký hoặc Về Đầu
+    jumpToAuthBtn?.addEventListener('click', () => {
+      navTrack.scrollTo({ left: navTrack.scrollWidth, behavior: 'smooth' });
+    });
+    jumpToStartBtn?.addEventListener('click', () => {
+      navTrack.scrollTo({ left: 0, behavior: 'smooth' });
+    });
+
+    // 3. Kéo chuột trực tiếp trên thanh menu (Drag-to-scroll header)
+    let isMenuDown = false;
+    let menuStartX = 0;
+    let menuScrollStart = 0;
+    let menuDragDist = 0;
+
+    navTrack.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isMenuDown = true;
+      navTrack.classList.add('dragging');
+      menuStartX = e.pageX - navTrack.offsetLeft;
+      menuScrollStart = navTrack.scrollLeft;
+      menuDragDist = 0;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isMenuDown) {
+        isMenuDown = false;
+        navTrack.classList.remove('dragging');
+      }
+    });
+
+    navTrack.addEventListener('mouseleave', () => {
+      if (isMenuDown) {
+        isMenuDown = false;
+        navTrack.classList.remove('dragging');
+      }
+    });
+
+    navTrack.addEventListener('mousemove', (e) => {
+      if (!isMenuDown) return;
+      e.preventDefault();
+      const x = e.pageX - navTrack.offsetLeft;
+      const walk = (x - menuStartX) * 1.5;
+      menuDragDist += Math.abs(x - menuStartX);
+      navTrack.scrollLeft = menuScrollStart - walk;
+    });
+
+    navTrack.addEventListener('click', (e) => {
+      // Nếu đang kéo rê chuột thì ngăn mở link nhầm
+      if (menuDragDist > 8) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
+    // 4. Kéo thanh trượt nằm ngang (Drag horizontal Range Slider Thumb)
+    let isThumbDragging = false;
+
+    const handleThumbDrag = (clientX) => {
+      if (!sliderTrack) return;
+      const rect = sliderTrack.getBoundingClientRect();
+      const clickX = clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+      const maxScroll = navTrack.scrollWidth - navTrack.clientWidth;
+      navTrack.scrollLeft = ratio * maxScroll;
+      syncThumbWithScroll();
+    };
+
+    sliderTrack?.addEventListener('click', (e) => {
+      handleThumbDrag(e.clientX);
+    });
+
+    sliderThumb?.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isThumbDragging = true;
+      sliderThumb.classList.add('dragging');
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isThumbDragging) return;
+      handleThumbDrag(e.clientX);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isThumbDragging) {
+        isThumbDragging = false;
+        sliderThumb?.classList.remove('dragging');
+      }
+    });
+
+    // Hỗ trợ cảm ứng vuốt trên mobile cho thanh trượt
+    sliderThumb?.addEventListener('touchstart', () => {
+      isThumbDragging = true;
+      sliderThumb.classList.add('dragging');
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isThumbDragging || !e.touches[0]) return;
+      handleThumbDrag(e.touches[0].clientX);
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      if (isThumbDragging) {
+        isThumbDragging = false;
+        sliderThumb?.classList.remove('dragging');
       }
     });
   }

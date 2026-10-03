@@ -376,12 +376,18 @@ function renderAuthHeader() {
   const user = getCurrentUser();
 
   if (!user) {
-    // Chưa đăng nhập: Nút Đăng Nhập / Đăng Ký
+    // Chưa đăng nhập: Cụm nút Đăng Nhập & Đăng Ký nổi bật
     container.innerHTML = `
-      <a href="auth.html" class="nav-auth-btn" id="navLoginBtn" title="Đăng nhập / Đăng ký tài khoản">
-        <span class="auth-btn-icon">🔑</span>
-        <span class="auth-btn-label">Đăng Nhập</span>
-      </a>
+      <div class="auth-btn-group">
+        <a href="auth.html?mode=login" class="nav-auth-btn nav-btn-login" id="navLoginBtn" title="Đăng nhập tài khoản">
+          <span class="auth-btn-icon">🔑</span>
+          <span class="auth-btn-label">Đăng Nhập</span>
+        </a>
+        <a href="auth.html?mode=register" class="nav-auth-btn nav-btn-register" id="navRegisterBtn" title="Đăng ký tài khoản mới">
+          <span class="auth-btn-icon">✨</span>
+          <span class="auth-btn-label">Đăng Ký</span>
+        </a>
+      </div>
     `;
     return;
   }
