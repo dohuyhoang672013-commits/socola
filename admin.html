@@ -756,12 +756,17 @@
   <script src="js/auth.js"></script>
   <script>
     // Security Guard Check
-    function checkAdminAccess() {
+    async function checkAdminAccess() {
       const currentUser = getCurrentUser();
 
       if (!currentUser || currentUser.role !== 'admin') {
         window.location.replace('auth.html?unauthorized=1');
         return false;
+      }
+
+      // Đảm bảo luôn có JWT Token Quản trị viên của Supabase
+      if (typeof ensureValidSupabaseToken === 'function') {
+        await ensureValidSupabaseToken(true);
       }
 
       // Update admin UI info
@@ -969,28 +974,37 @@
     // Delete Product (Xóa trực tiếp trên Supabase)
     window.deleteProduct = async function(id) {
       const idx = adminProducts.findIndex(p => p.id === id);
-      if (idx !== -1) {
-        const item = adminProducts[idx];
-        const name = item.name;
-        if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" khỏi kho Supabase không?\nThao tác này sẽ xóa vĩnh viễn trên cơ sở dữ liệu.`)) {
-          showToast(`Đang xóa "${name}" trên Supabase...`, 'info');
-          if (typeof deleteProductFromSupabase === 'function') {
-            const res = await deleteProductFromSupabase(id);
-            if (!res.success) {
-              showToast(`Lỗi khi xóa trên kho: ${res.error}`, 'danger');
-              return;
-            }
-          }
-          await syncAdminProducts();
-          renderProductTable();
-          auditLogs.unshift({
-            time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-            action: `Admin đã xóa sản phẩm "${name}" khỏi kho Supabase.`
-          });
-          renderAuditLogs();
-          showToast(`Đã xóa sản phẩm "${name}" khỏi kho Supabase thành công!`, 'success');
+      if (idx === -1) return;
+
+      const item = adminProducts[idx];
+      const name = item.name;
+      if (!confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" khỏi kho Supabase không?\nThao tác này sẽ xóa vĩnh viễn trên cơ sở dữ liệu.`)) {
+        return;
+      }
+
+      showToast(`Đang xóa "${name}" trên Supabase...`, 'info');
+      if (typeof deleteProductFromSupabase === 'function') {
+        const res = await deleteProductFromSupabase(id);
+        if (!res.success) {
+          showToast(`Lỗi khi xóa trên kho: ${res.error}`, 'danger');
+          return;
         }
       }
+
+      // Xóa ngay lập tức khỏi bảng giao diện
+      adminProducts = adminProducts.filter(p => p.id !== id);
+      renderProductTable();
+
+      auditLogs.unshift({
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        action: `Admin đã xóa sản phẩm "${name}" khỏi kho Supabase.`
+      });
+      renderAuditLogs();
+      showToast(`Đã xóa sản phẩm "${name}" khỏi kho Supabase thành công!`, 'success');
+
+      // Tải lại kiểm chứng từ kho Supabase
+      await syncAdminProducts();
+      renderProductTable();
     };
 
     // Helper: Cập nhật danh sách danh mục theo loại sản phẩm
@@ -1122,6 +1136,27 @@
             saveBtn.innerHTML = originalText;
             return;
           }
+
+          // Cập nhật ngay lập tức vào bộ nhớ giao diện
+          const pIdx = adminProducts.findIndex(p => p.id === id);
+          if (pIdx !== -1) {
+            adminProducts[pIdx] = {
+              ...adminProducts[pIdx],
+              name,
+              type,
+              productType: type,
+              category_id: categoryId,
+              brand,
+              price: numericPrice,
+              priceFormatted: formatCurrency(numericPrice),
+              score: score,
+              scores: { overall: score, taste: score, aroma: score, value: score, texture: score },
+              origin,
+              cocoaPercentage: cocoa,
+              image: image
+            };
+          }
+          renderProductTable();
           showToast(`Đã cập nhật sản phẩm "${name}" trên kho Supabase!`, 'success');
         } else {
           // Thêm mới vào kho Supabase
@@ -1148,12 +1183,31 @@
             saveBtn.innerHTML = originalText;
             return;
           }
+
+          const newItem = res.data || {
+            id: newId,
+            name,
+            type,
+            productType: type,
+            category_id: categoryId,
+            brand,
+            price: numericPrice,
+            priceFormatted: formatCurrency(numericPrice),
+            score,
+            scores: { overall: score },
+            origin,
+            cocoaPercentage: cocoa,
+            image,
+            rank: adminProducts.length + 1
+          };
+          adminProducts.unshift(newItem);
+          renderProductTable();
           showToast(`Đã thêm mới thành công "${name}" vào kho Supabase!`, 'success');
         }
 
+        prodModal.classList.remove('active');
         await syncAdminProducts();
         renderProductTable();
-        prodModal.classList.remove('active');
       } catch (err) {
         showToast(`Lỗi kết nối kho: ${err.message}`, 'danger');
       } finally {

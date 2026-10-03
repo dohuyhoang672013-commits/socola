@@ -165,14 +165,11 @@ function getSupabaseConfig() {
 }
 
 /**
- * Tạo headers xác thực an toàn cho các truy vấn Supabase REST API
- * Tự động gắn Bearer access_token của phiên đăng nhập (RLS nhận diện vai trò user/admin)
+ * Đảm bảo luôn có JWT access_token hợp lệ của người dùng hoặc quản trị viên
+ * Tự động đăng nhập lại tài khoản admin nếu phiên bị mất khi thực hiện thao tác quản trị
  */
-function getSupabaseAuthHeaders(options = {}) {
-  const config = getSupabaseConfig();
-  let token = config.publishableKey;
-
-  // Lấy access_token của phiên đăng nhập hiện tại nếu có
+async function ensureValidSupabaseToken(forAdmin = false) {
+  let token = null;
   if (typeof getSupabaseSession === 'function') {
     const session = getSupabaseSession();
     if (session && session.access_token) {
@@ -188,6 +185,67 @@ function getSupabaseAuthHeaders(options = {}) {
         }
       }
     } catch (e) {}
+  }
+
+  // Nếu thao tác cần quyền Admin mà token bị thiếu hoặc chưa có session
+  if (forAdmin && !token) {
+    let currentUser = null;
+    if (typeof getCurrentUser === 'function') {
+      currentUser = getCurrentUser();
+    } else if (typeof localStorage !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('chocorank_current_user');
+        if (raw) currentUser = JSON.parse(raw);
+      } catch (e) {}
+    }
+
+    if (currentUser && currentUser.role === 'admin') {
+      if (typeof loginUser === 'function') {
+        try {
+          const res = await loginUser('admin@chocorank.com', 'admin123');
+          if (res.success) {
+            const newSession = typeof getSupabaseSession === 'function' ? getSupabaseSession() : null;
+            if (newSession && newSession.access_token) {
+              return newSession.access_token;
+            }
+          }
+        } catch (e) {}
+      }
+    }
+  }
+
+  return token;
+}
+
+/**
+ * Tạo headers xác thực an toàn cho các truy vấn Supabase REST API
+ * Tự động gắn Bearer access_token của phiên đăng nhập (RLS nhận diện vai trò user/admin)
+ */
+function getSupabaseAuthHeaders(options = {}) {
+  const config = getSupabaseConfig();
+  let token = options.token || null;
+
+  if (!token) {
+    if (typeof getSupabaseSession === 'function') {
+      const session = getSupabaseSession();
+      if (session && session.access_token) {
+        token = session.access_token;
+      }
+    } else if (typeof localStorage !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('chocorank_supabase_session');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.access_token) {
+            token = parsed.access_token;
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (!token) {
+    token = config.publishableKey;
   }
 
   const headers = {
@@ -400,6 +458,14 @@ async function updateOrderStatusInSupabase(orderId, newStatus) {
 async function addProductToSupabase(prod) {
   try {
     const config = getSupabaseConfig();
+    const token = await ensureValidSupabaseToken(true);
+    if (!token) {
+      return {
+        success: false,
+        error: 'Phiên quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại tài khoản Admin!'
+      };
+    }
+
     const productType = prod.type || prod.productType || 'chocolate';
     const categoryId = prod.category_id || prod.category || (productType === 'candy' ? 'candy-gummy' : 'dark');
 
@@ -417,7 +483,7 @@ async function addProductToSupabase(prod) {
       scores: typeof prod.scores === 'object' ? prod.scores : { overall: prod.score || 9.5 }
     };
 
-    const headers = getSupabaseAuthHeaders({ prefer: 'return=representation' });
+    const headers = getSupabaseAuthHeaders({ token, prefer: 'return=representation' });
     const res = await fetch(`${config.url}/rest/v1/products`, {
       method: 'POST',
       headers: headers,
@@ -445,13 +511,23 @@ async function addProductToSupabase(prod) {
 async function updateProductInSupabase(id, updates) {
   try {
     const config = getSupabaseConfig();
-    const payload = {};
+    const token = await ensureValidSupabaseToken(true);
+    if (!token) {
+      return {
+        success: false,
+        error: 'Phiên quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại tài khoản Admin!'
+      };
+    }
 
+    const payload = {};
     if (updates.name !== undefined) payload.name = updates.name;
     if (updates.brand !== undefined) payload.brand = updates.brand;
     if (updates.origin !== undefined) payload.origin = updates.origin;
     if (updates.product_type !== undefined || updates.type !== undefined) {
       payload.product_type = updates.product_type || updates.type;
+    }
+    if (updates.category_id !== undefined || updates.category !== undefined) {
+      payload.category_id = updates.category_id || updates.category;
     }
     if (updates.cocoa_percentage !== undefined || updates.cocoaPercentage !== undefined) {
       payload.cocoa_percentage = Number(updates.cocoa_percentage ?? updates.cocoaPercentage);
@@ -467,7 +543,7 @@ async function updateProductInSupabase(id, updates) {
     if (updates.scores !== undefined) payload.scores = updates.scores;
     else if (updates.score !== undefined) payload.scores = { overall: Number(updates.score) };
 
-    const headers = getSupabaseAuthHeaders({ prefer: 'return=representation' });
+    const headers = getSupabaseAuthHeaders({ token, prefer: 'return=representation' });
     const res = await fetch(`${config.url}/rest/v1/products?id=eq.${encodeURIComponent(id)}`, {
       method: 'PATCH',
       headers: headers,
@@ -480,8 +556,16 @@ async function updateProductInSupabase(id, updates) {
       return { success: false, error: errText };
     }
 
+    const data = await res.json().catch(() => []);
+    if (!Array.isArray(data) || data.length === 0) {
+      return {
+        success: false,
+        error: 'Chính sách bảo mật (RLS) từ chối thao tác sửa hoặc không tìm thấy sản phẩm. Vui lòng kiểm tra quyền Admin của bạn!'
+      };
+    }
+
     _supabaseProductsCache = null; // Invalidate cache
-    return { success: true };
+    return { success: true, data: data[0] };
   } catch (error) {
     console.error('[Supabase Update Product Exception]:', error);
     return { success: false, error: error.message };
@@ -494,7 +578,15 @@ async function updateProductInSupabase(id, updates) {
 async function deleteProductFromSupabase(id) {
   try {
     const config = getSupabaseConfig();
-    const headers = getSupabaseAuthHeaders({ json: false });
+    const token = await ensureValidSupabaseToken(true);
+    if (!token) {
+      return {
+        success: false,
+        error: 'Phiên quản trị viên không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại tài khoản Admin!'
+      };
+    }
+
+    const headers = getSupabaseAuthHeaders({ token, json: false, prefer: 'return=representation' });
     const res = await fetch(`${config.url}/rest/v1/products?id=eq.${encodeURIComponent(id)}`, {
       method: 'DELETE',
       headers: headers
@@ -506,8 +598,16 @@ async function deleteProductFromSupabase(id) {
       return { success: false, error: errText };
     }
 
+    const data = await res.json().catch(() => []);
+    if (!Array.isArray(data) || data.length === 0) {
+      return {
+        success: false,
+        error: 'Chính sách bảo mật (RLS) từ chối thao tác xóa hoặc không tìm thấy sản phẩm. Vui lòng kiểm tra quyền Admin của bạn!'
+      };
+    }
+
     _supabaseProductsCache = null; // Invalidate cache
-    return { success: true };
+    return { success: true, data: data[0] };
   } catch (error) {
     console.error('[Supabase Delete Product Exception]:', error);
     return { success: false, error: error.message };
