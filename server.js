@@ -21,19 +21,28 @@ const server = http.createServer((req, res) => {
   }
 
   // API Endpoint: Ghi nhận đơn hàng trực tiếp vào kho Supabase
-  if (req.method === 'POST' && reqPath === '/api/orders') {
+  if (reqPath === '/api/orders' && (req.method === 'POST' || req.method === 'PATCH')) {
     let body = '';
     req.on('data', chunk => { body += chunk; });
     req.on('end', async () => {
       try {
-        const payload = JSON.parse(body);
-        const supabaseRes = await fetch('https://ukwuzbacxinidphzhftr.supabase.co/rest/v1/orders', {
-          method: 'POST',
+        const payload = JSON.parse(body || '{}');
+        const authHeader = req.headers['authorization'] || 'Bearer sb_publishable_vHK1gIdoebQ-4WwaIjeEmg_elX97-SK';
+        
+        let url = 'https://ukwuzbacxinidphzhftr.supabase.co/rest/v1/orders';
+        let method = req.method;
+        if (req.method === 'PATCH' && payload.orderId) {
+          url += `?id=eq.${encodeURIComponent(payload.orderId)}`;
+          delete payload.orderId;
+        }
+
+        const supabaseRes = await fetch(url, {
+          method: method,
           headers: {
             'apikey': 'sb_publishable_vHK1gIdoebQ-4WwaIjeEmg_elX97-SK',
-            'Authorization': 'Bearer sb_publishable_vHK1gIdoebQ-4WwaIjeEmg_elX97-SK',
+            'Authorization': authHeader,
             'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates,return=representation'
+            'Prefer': req.method === 'POST' ? 'resolution=merge-duplicates,return=representation' : 'return=representation'
           },
           body: JSON.stringify(payload)
         });

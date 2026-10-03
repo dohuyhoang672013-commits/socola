@@ -165,6 +165,46 @@ function getSupabaseConfig() {
 }
 
 /**
+ * Tạo headers xác thực an toàn cho các truy vấn Supabase REST API
+ * Tự động gắn Bearer access_token của phiên đăng nhập (RLS nhận diện vai trò user/admin)
+ */
+function getSupabaseAuthHeaders(options = {}) {
+  const config = getSupabaseConfig();
+  let token = config.publishableKey;
+
+  // Lấy access_token của phiên đăng nhập hiện tại nếu có
+  if (typeof getSupabaseSession === 'function') {
+    const session = getSupabaseSession();
+    if (session && session.access_token) {
+      token = session.access_token;
+    }
+  } else if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('chocorank_supabase_session');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.access_token) {
+          token = parsed.access_token;
+        }
+      }
+    } catch (e) {}
+  }
+
+  const headers = {
+    'apikey': config.publishableKey,
+    'Authorization': `Bearer ${token}`
+  };
+
+  if (options.json !== false) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (options.prefer) {
+    headers['Prefer'] = options.prefer;
+  }
+  return headers;
+}
+
+/**
  * Gửi đơn đặt hàng mới lưu vào bảng orders trên Supabase
  */
 async function saveOrderToSupabase(orderData) {
@@ -173,9 +213,26 @@ async function saveOrderToSupabase(orderData) {
     const rawId = orderData.orderId || orderData.id || `CR-${Math.floor(10000 + Math.random() * 90000)}`;
     const cleanId = String(rawId).replace(/^#/, '').trim();
 
+    // Lấy thông tin user hiện tại nếu đã đăng nhập
+    let currentUserId = null;
+    let currentUserEmail = null;
+    try {
+      let session = null;
+      if (typeof getSupabaseSession === 'function') {
+        session = getSupabaseSession();
+      } else if (typeof localStorage !== 'undefined') {
+        const raw = localStorage.getItem('chocorank_supabase_session');
+        if (raw) session = JSON.parse(raw);
+      }
+      if (session && session.user) {
+        currentUserId = session.user.id || null;
+        currentUserEmail = session.user.email || null;
+      }
+    } catch (e) {}
+
     const customerName = (orderData.customer?.name || orderData.customerName || 'Khách Hàng Quý').trim();
     const customerPhone = (orderData.customer?.phone || orderData.customerPhone || '0901234567').trim() || '0901234567';
-    const customerEmail = (orderData.customer?.email || orderData.customerEmail || '').trim() || null;
+    const customerEmail = (orderData.customer?.email || orderData.customerEmail || currentUserEmail || '').trim() || null;
     const customerAddress = (orderData.customer?.address || orderData.customerAddress || 'Chưa cung cấp địa chỉ').trim();
     const customerNote = (orderData.customer?.note || orderData.customerNote || '').trim() || null;
     const paymentMethod = orderData.paymentMethod || orderData.payment_method || 'COD (Tiền mặt khi nhận)';
@@ -199,17 +256,17 @@ async function saveOrderToSupabase(orderData) {
       grand_total: grandTotal,
       status: status
     };
+    if (currentUserId) {
+      payload.user_id = currentUserId;
+    }
+
+    const authHeaders = getSupabaseAuthHeaders({ prefer: 'resolution=merge-duplicates,return=representation' });
 
     // 1. Gửi trực tiếp lên kho Supabase REST API
     try {
       const res = await fetch(`${config.url}/rest/v1/orders`, {
         method: 'POST',
-        headers: {
-          'apikey': config.publishableKey,
-          'Authorization': `Bearer ${config.publishableKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates,return=representation'
-        },
+        headers: authHeaders,
         body: JSON.stringify(payload)
       });
 
@@ -229,7 +286,7 @@ async function saveOrderToSupabase(orderData) {
     try {
       const proxyRes = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(payload)
       });
       if (proxyRes.ok) {
@@ -254,11 +311,9 @@ async function saveOrderToSupabase(orderData) {
 async function loadOrdersFromSupabase() {
   try {
     const config = getSupabaseConfig();
+    const headers = getSupabaseAuthHeaders({ json: false });
     const res = await fetch(`${config.url}/rest/v1/orders?select=*&order=created_at.desc`, {
-      headers: {
-        'apikey': config.publishableKey,
-        'Authorization': `Bearer ${config.publishableKey}`
-      }
+      headers: headers
     });
 
     if (!res.ok) {
@@ -296,17 +351,13 @@ async function updateOrderStatusInSupabase(orderId, newStatus) {
   try {
     const config = getSupabaseConfig();
     const cleanId = String(orderId).trim();
+    const authHeaders = getSupabaseAuthHeaders({ prefer: 'return=representation' });
 
     // 1. Cập nhật trực tiếp lên Supabase REST API
     try {
       const res = await fetch(`${config.url}/rest/v1/orders?id=eq.${encodeURIComponent(cleanId)}`, {
         method: 'PATCH',
-        headers: {
-          'apikey': config.publishableKey,
-          'Authorization': `Bearer ${config.publishableKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
+        headers: authHeaders,
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -325,7 +376,7 @@ async function updateOrderStatusInSupabase(orderId, newStatus) {
     try {
       const proxyRes = await fetch('/api/orders', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({ orderId: cleanId, status: newStatus })
       });
       if (proxyRes.ok) {
@@ -366,14 +417,10 @@ async function addProductToSupabase(prod) {
       scores: typeof prod.scores === 'object' ? prod.scores : { overall: prod.score || 9.5 }
     };
 
+    const headers = getSupabaseAuthHeaders({ prefer: 'return=representation' });
     const res = await fetch(`${config.url}/rest/v1/products`, {
       method: 'POST',
-      headers: {
-        'apikey': config.publishableKey,
-        'Authorization': `Bearer ${config.publishableKey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
+      headers: headers,
       body: JSON.stringify(payload)
     });
 
@@ -420,14 +467,10 @@ async function updateProductInSupabase(id, updates) {
     if (updates.scores !== undefined) payload.scores = updates.scores;
     else if (updates.score !== undefined) payload.scores = { overall: Number(updates.score) };
 
+    const headers = getSupabaseAuthHeaders({ prefer: 'return=representation' });
     const res = await fetch(`${config.url}/rest/v1/products?id=eq.${encodeURIComponent(id)}`, {
       method: 'PATCH',
-      headers: {
-        'apikey': config.publishableKey,
-        'Authorization': `Bearer ${config.publishableKey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
+      headers: headers,
       body: JSON.stringify(payload)
     });
 
@@ -451,12 +494,10 @@ async function updateProductInSupabase(id, updates) {
 async function deleteProductFromSupabase(id) {
   try {
     const config = getSupabaseConfig();
+    const headers = getSupabaseAuthHeaders({ json: false });
     const res = await fetch(`${config.url}/rest/v1/products?id=eq.${encodeURIComponent(id)}`, {
       method: 'DELETE',
-      headers: {
-        'apikey': config.publishableKey,
-        'Authorization': `Bearer ${config.publishableKey}`
-      }
+      headers: headers
     });
 
     if (!res.ok) {
@@ -479,11 +520,9 @@ async function deleteProductFromSupabase(id) {
 async function loadProfilesFromSupabase() {
   try {
     const config = getSupabaseConfig();
+    const headers = getSupabaseAuthHeaders({ json: false });
     const res = await fetch(`${config.url}/rest/v1/profiles?select=*&order=created_at.asc`, {
-      headers: {
-        'apikey': config.publishableKey,
-        'Authorization': `Bearer ${config.publishableKey}`
-      }
+      headers: headers
     });
     if (!res.ok) return null;
     const rows = await res.json();
@@ -519,14 +558,10 @@ async function saveProfileToSupabase(profile) {
       joined_date: profile.joinedDate,
       status: profile.status || 'active'
     };
+    const headers = getSupabaseAuthHeaders({ prefer: 'return=representation' });
     const res = await fetch(`${config.url}/rest/v1/profiles`, {
       method: 'POST',
-      headers: {
-        'apikey': config.publishableKey,
-        'Authorization': `Bearer ${config.publishableKey}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
+      headers: headers,
       body: JSON.stringify(payload)
     });
     return { success: res.ok };
