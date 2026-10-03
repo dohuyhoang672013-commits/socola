@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/api/orders", "destination": "/api/orders.js" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/auth", "destination": "/auth.html" },
+    { "source": "/checkout", "destination": "/checkout.html" }
+  ]
+}

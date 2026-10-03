@@ -3,7 +3,6 @@
 .env.local
 .env.*.local
 .env.*
-js/supabase-config.js
 scripts/
 utils/
 supabase_schema.sql

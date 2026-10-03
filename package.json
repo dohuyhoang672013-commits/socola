@@ -4,6 +4,7 @@
   "description": "ChocoRank - Nền tảng thống kê & đánh giá socola và kẹo thượng hạng",
   "main": "server.js",
   "scripts": {
+    "build": "echo 'Build OK'",
     "start": "node server.js"
   },
   "keywords": [
