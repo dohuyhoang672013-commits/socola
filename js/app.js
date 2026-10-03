@@ -135,6 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderStatistics();
     renderCategoryPills();
     renderChocolates();
+    renderHorizontalSlider();
+    initHorizontalSliderEvents();
     renderEatingStyles();
     renderAuthenticityCases();
   }
@@ -537,6 +539,202 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
+  // RENDER HORIZONTAL SLIDER (THANH KÉO TỪ TRÁI QUA PHẢI NẰM NGANG)
+  // =========================================================================
+  function renderHorizontalSlider() {
+    const track = document.getElementById('horizontalSliderTrack');
+    if (!track) return;
+
+    if (!CHOCOLATE_DATA || CHOCOLATE_DATA.length === 0) {
+      track.innerHTML = `
+        <div style="padding: 40px; text-align: center; width: 100%; color: var(--gold-light);">
+          Đang nạp danh sách món ngon nổi bật...
+        </div>
+      `;
+      return;
+    }
+
+    // Lựa chọn các món nổi bật nhất (Top socola và top kẹo hàng đầu)
+    const featuredItems = [...CHOCOLATE_DATA].sort((a, b) => {
+      const scoreA = (a.scores && a.scores.overall) || 9.0;
+      const scoreB = (b.scores && b.scores.overall) || 9.0;
+      return scoreB - scoreA;
+    });
+
+    const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+
+    track.innerHTML = featuredItems.map((item) => {
+      const isFav = state.wishlist.includes(item.id);
+      const isCandy = item.productType === 'candy';
+
+      let rankClass = 'rank-normal';
+      if (item.rank === 1) rankClass = 'rank-1';
+      else if (item.rank === 2) rankClass = 'rank-2';
+      else if (item.rank === 3) rankClass = 'rank-3';
+
+      const badgeText = item.badge || (isCandy ? '🍬 Kẹo Thượng Hạng' : '🍫 Socola Tuyển Chọn');
+      const typeLabel = isCandy ? '🍬 Kẹo' : `${item.cocoa || 70}% Cacao`;
+      const scoreDisplay = item.scores && item.scores.overall ? item.scores.overall.toFixed(1) : '9.5';
+
+      return `
+        <article class="slider-item-card" data-id="${item.id}">
+          <div class="slider-card-rank ${rankClass}">#${item.rank}</div>
+          <button type="button" class="slider-card-fav ${isFav ? 'active' : ''}" data-action="fav" data-id="${item.id}" title="${isFav ? 'Bỏ yêu thích' : 'Lưu yêu thích'}">
+            ${isFav ? '❤️' : '🤍'}
+          </button>
+          
+          <div class="slider-card-img-wrap" data-action="detail" data-id="${item.id}">
+            <img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
+            <span class="slider-card-badge">${badgeText}</span>
+          </div>
+
+          <div class="slider-card-body">
+            <div class="slider-card-tags">
+              <span class="slider-tag-origin">🌍 ${item.origin || 'Thủ Công'}</span>
+              <span class="slider-tag-type">${typeLabel}</span>
+            </div>
+
+            <h3 class="slider-card-title" data-action="detail" data-id="${item.id}">${item.name}</h3>
+            <div class="slider-card-brand">${item.brand}</div>
+
+            <div class="slider-card-footer">
+              <div class="slider-card-price-wrap">
+                <span class="slider-card-score">★ ${scoreDisplay} / 10</span>
+                <span class="slider-card-price">${formatCurrency(item.price)}</span>
+              </div>
+
+              <div class="slider-card-actions">
+                <button type="button" class="btn-slider-detail" data-action="detail" data-id="${item.id}" title="Xem chi tiết">
+                  👁️
+                </button>
+                <button type="button" class="btn-slider-buy ${!currentUser ? 'btn-buy-locked' : ''}" data-action="buy" data-id="${item.id}" title="${currentUser ? 'Đặt mua ngay' : 'Đăng nhập để đặt mua'}">
+                  ${currentUser ? '🛒 Mua' : '🔒 Mua'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    // Cập nhật tổng số món vào thanh trạng thái
+    const totalEl = document.getElementById('sliderTotalItems');
+    if (totalEl) totalEl.textContent = featuredItems.length;
+  }
+
+  // =========================================================================
+  // INTERACTIVE DRAGGABLE & SCROLLABLE EVENTS FOR HORIZONTAL SLIDER
+  // =========================================================================
+  let isSliderEventsBound = false;
+  function initHorizontalSliderEvents() {
+    if (isSliderEventsBound) return;
+    const track = document.getElementById('horizontalSliderTrack');
+    const prevBtn = document.getElementById('sliderPrevBtn');
+    const nextBtn = document.getElementById('sliderNextBtn');
+    const progressThumb = document.getElementById('sliderProgressThumb');
+    const currentCounter = document.getElementById('sliderCurrentItem');
+    if (!track) return;
+
+    isSliderEventsBound = true;
+
+    // 1. Nút bấm cuộn Trái / Phải
+    prevBtn?.addEventListener('click', () => {
+      track.scrollBy({ left: -330, behavior: 'smooth' });
+    });
+    nextBtn?.addEventListener('click', () => {
+      track.scrollBy({ left: 330, behavior: 'smooth' });
+    });
+
+    // 2. Kéo chuột nằm ngang mượt mà (Mouse Drag-to-scroll)
+    let isDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+    let dragDistance = 0;
+
+    track.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // Chỉ nhận chuột trái
+      isDown = true;
+      track.classList.add('dragging');
+      startX = e.pageX - track.offsetLeft;
+      scrollStart = track.scrollLeft;
+      dragDistance = 0;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isDown) return;
+      isDown = false;
+      track.classList.remove('dragging');
+    });
+
+    track.addEventListener('mouseleave', () => {
+      if (isDown) {
+        isDown = false;
+        track.classList.remove('dragging');
+      }
+    });
+
+    track.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      const walk = (x - startX) * 1.6;
+      dragDistance += Math.abs(x - startX);
+      track.scrollLeft = scrollStart - walk;
+    });
+
+    // 3. Cập nhật thanh tiến độ kéo (Progress Track) & Bộ đếm món
+    const updateProgress = () => {
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      const pct = maxScroll > 0 ? (track.scrollLeft / maxScroll) * 100 : 0;
+      if (progressThumb) {
+        const thumbWidth = Math.max(15, Math.min(100, 15 + pct * 0.85));
+        progressThumb.style.width = `${thumbWidth}%`;
+      }
+      if (currentCounter && CHOCOLATE_DATA.length > 0) {
+        const cardWidth = 330;
+        const currentIdx = Math.max(1, Math.min(CHOCOLATE_DATA.length, Math.round(track.scrollLeft / cardWidth) + 1));
+        currentCounter.textContent = currentIdx;
+      }
+    };
+
+    track.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+
+    // 4. Phân biệt tương tác Click và Kéo (Drag)
+    track.addEventListener('click', (e) => {
+      // Nếu vừa kéo chuột (khoảng cách > 8px), bỏ qua click để không bị mở nhầm
+      if (dragDistance > 8) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      const buyBtn = e.target.closest('[data-action="buy"]');
+      if (buyBtn) {
+        handleBuyProduct(buyBtn.dataset.id);
+        return;
+      }
+
+      const favBtn = e.target.closest('[data-action="fav"]');
+      if (favBtn) {
+        toggleWishlist(favBtn.dataset.id);
+        return;
+      }
+
+      const detailBtn = e.target.closest('[data-action="detail"]');
+      if (detailBtn) {
+        openDetailModal(detailBtn.dataset.id);
+        return;
+      }
+
+      const card = e.target.closest('.slider-item-card');
+      if (card && card.dataset.id) {
+        openDetailModal(card.dataset.id);
+      }
+    });
+  }
+
+  // =========================================================================
   // WISHLIST MANAGEMENT
   // =========================================================================
   function toggleWishlist(id) {
@@ -561,6 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('choco_wishlist', JSON.stringify(state.wishlist));
     updateWishlistBadge();
     renderChocolates();
+    renderHorizontalSlider();
   }
 
   // =========================================================================

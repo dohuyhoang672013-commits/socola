@@ -147,6 +147,50 @@
     </section>
 
     <!-- ========================================================================
+         FEATURED HORIZONTAL SLIDER (THANH KÉO TỪ TRÁI QUA PHẢI NẰM NGANG)
+         ======================================================================== -->
+    <section class="horizontal-slider-section" id="featuredSliderSection">
+      <div class="container">
+        <div class="slider-header-wrap">
+          <div class="slider-header-left">
+            <span class="section-badge">🔥 BỘ SƯU TẬP TUYỂN CHỌN ĐẶC BIỆT</span>
+            <h2 class="section-title">Top Món Ngon Nổi Bật <span class="gold-gradient-text">& Được Mua Nhiều Nhất</span></h2>
+            <p class="section-subtitle">Thanh kéo trượt ngang trực quan: Bấm giữ kéo chuột hoặc vuốt từ trái qua phải để khám phá những tuyệt phẩm socola & kẹo thượng hạng.</p>
+          </div>
+          <div class="slider-controls-right">
+            <button type="button" class="slider-nav-btn" id="sliderPrevBtn" aria-label="Cuộn sang trái" title="Lướt sang trái">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button type="button" class="slider-nav-btn" id="sliderNextBtn" aria-label="Cuộn sang phải" title="Lướt sang phải">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Khung thanh kéo nằm ngang -->
+        <div class="slider-track-container" id="sliderTrackContainer">
+          <div class="slider-track" id="horizontalSliderTrack" role="region" aria-label="Thanh kéo sản phẩm nổi bật nằm ngang">
+            <!-- Sản phẩm nổi bật được render tự động từ dữ liệu Supabase -->
+          </div>
+        </div>
+
+        <!-- Thanh trạng thái kéo và tiến độ trượt từ trái qua phải -->
+        <div class="slider-footer-bar">
+          <div class="slider-drag-hint">
+            <span class="drag-icon">↔️</span>
+            <span>Bấm giữ chuột kéo từ trái qua phải hoặc dùng 2 nút mũi tên để lướt</span>
+          </div>
+          <div class="slider-progress-track">
+            <div class="slider-progress-thumb" id="sliderProgressThumb"></div>
+          </div>
+          <div class="slider-counter" id="sliderCounterDisplay">
+            <span id="sliderCurrentItem">1</span> / <span id="sliderTotalItems">--</span> món
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
          STATISTICS & INSIGHTS DASHBOARD
          ======================================================================== -->
     <section class="stats-section" id="statistics">
