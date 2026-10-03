@@ -802,17 +802,45 @@
       setTimeout(() => toast.remove(), 2500);
     }
 
+    // Helper định dạng tiền tệ VNĐ chuẩn
+    function formatCurrency(amount) {
+      const num = typeof amount === 'number' ? amount : (parseInt(String(amount || 0).replace(/[^0-9]/g, ''), 10) || 0);
+      return new Intl.NumberFormat('vi-VN').format(num) + '₫';
+    }
+
     // Danh sách sản phẩm được tải động từ kho Supabase
     let adminProducts = [];
 
     async function syncAdminProducts() {
-      if (typeof loadProductsFromSupabase === 'function') {
-        const prods = await loadProductsFromSupabase();
-        adminProducts = prods.map(p => ({
+      try {
+        if (typeof loadProductsFromSupabase === 'function') {
+          const prods = await loadProductsFromSupabase(true);
+          if (Array.isArray(prods) && prods.length > 0) {
+            adminProducts = prods.map(p => ({
+              ...p,
+              type: p.productType || p.type || 'chocolate',
+              cocoaPercentage: p.cocoa !== undefined ? p.cocoa : (p.cocoaPercentage || 0),
+              score: (p.scores && p.scores.overall) || p.score || 9.5,
+              priceFormatted: formatCurrency(p.price)
+            }));
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Lỗi đồng bộ sản phẩm từ Supabase:', err);
+      }
+
+      // Fallback từ window.CHOCOLATE_DATA hoặc js/data.js
+      const rawData = (typeof CHOCOLATE_DATA !== 'undefined' && Array.isArray(CHOCOLATE_DATA) && CHOCOLATE_DATA.length > 0)
+        ? CHOCOLATE_DATA
+        : ((typeof window !== 'undefined' && Array.isArray(window.CHOCOLATE_DATA)) ? window.CHOCOLATE_DATA : []);
+
+      if (rawData.length > 0) {
+        adminProducts = rawData.map(p => ({
           ...p,
-          type: p.productType,
-          cocoaPercentage: p.cocoa,
-          score: p.scores?.overall || 9.5,
+          type: p.productType || p.type || 'chocolate',
+          cocoaPercentage: p.cocoa !== undefined ? p.cocoa : (p.cocoaPercentage || 0),
+          score: (p.scores && p.scores.overall) || p.score || 9.5,
           priceFormatted: formatCurrency(p.price)
         }));
       }
@@ -839,18 +867,25 @@
     // Render Product Table
     function renderProductTable() {
       const tbody = document.getElementById('adminProductTableBody');
-      const searchVal = (document.getElementById('adminProductSearch').value || '').trim().toLowerCase();
-      const catVal = document.getElementById('adminCategoryFilter').value;
+      if (!tbody) return;
+
+      const searchInput = document.getElementById('adminProductSearch');
+      const searchVal = (searchInput ? searchInput.value : '').trim().toLowerCase();
+      const catSelect = document.getElementById('adminCategoryFilter');
+      const catVal = catSelect ? catSelect.value : 'all';
 
       let filtered = adminProducts.filter(item => {
-        const matchSearch = !searchVal || item.name.toLowerCase().includes(searchVal) ||
-                            item.brand.toLowerCase().includes(searchVal) ||
-                            (item.origin && item.origin.toLowerCase().includes(searchVal));
-        const matchCat = catVal === 'all' || item.type === catVal;
+        const name = (item.name || '').toLowerCase();
+        const brand = (item.brand || '').toLowerCase();
+        const origin = (item.origin || '').toLowerCase();
+        const matchSearch = !searchVal || name.includes(searchVal) || brand.includes(searchVal) || origin.includes(searchVal);
+        const itemType = item.type || item.productType || 'chocolate';
+        const matchCat = catVal === 'all' || itemType === catVal;
         return matchSearch && matchCat;
       });
 
-      document.getElementById('kpiTotalProducts').textContent = adminProducts.length;
+      const totalKpi = document.getElementById('kpiTotalProducts');
+      if (totalKpi) totalKpi.textContent = adminProducts.length;
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">Không tìm thấy sản phẩm nào phù hợp.</td></tr>`;
@@ -864,13 +899,13 @@
           : `<span class="badge-tag badge-tag-candy">🍬 Kẹo Ngon</span>`;
 
         const cocoaOrFeature = isChoco 
-          ? `<strong style="color: var(--gold-light);">${item.cocoaPercentage}% Cacao</strong>`
+          ? `<strong style="color: var(--gold-light);">${item.cocoaPercentage ?? item.cocoa ?? 70}% Cacao</strong>`
           : `<span style="color: var(--text-muted);">${item.texture || 'Kẹo dẻo/ngậm'}</span>`;
 
         return `
           <tr id="row-${item.id}">
             <td>
-              <img src="${item.image}" alt="${item.name}" class="table-prod-img">
+              <img src="${item.image || 'assets/images/placeholder.jpg'}" alt="${item.name}" class="table-prod-img" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
             </td>
             <td>
               <span class="table-prod-name">${item.name}</span>
@@ -878,11 +913,11 @@
             </td>
             <td>${typeBadge}</td>
             <td>
-              <span>${item.brand}</span>
-              <span class="table-prod-origin">• ${item.origin || 'Nhập khẩu'}</span>
+              <span>${item.brand || 'Thủ Công'}</span>
+              <span class="table-prod-origin">• ${item.origin || 'Việt Nam'}</span>
             </td>
             <td>${cocoaOrFeature}</td>
-            <td style="font-weight: 700; color: var(--text-main);">${item.priceFormatted || item.price}</td>
+            <td style="font-weight: 700; color: var(--text-main);">${item.priceFormatted || formatCurrency(item.price)}</td>
             <td>
               <span style="color: var(--gold-light); font-weight: 800;">★ ${item.score || 9.5}</span>
             </td>
@@ -1287,15 +1322,25 @@
     });
 
     // Initialize
-    document.addEventListener('DOMContentLoaded', async () => {
+    async function initAdminDashboard() {
       if (checkAdminAccess()) {
+        const tbody = document.getElementById('adminProductTableBody');
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--gold-light);"><div style="display:inline-block;width:30px;height:30px;border:3px solid rgba(212,175,55,0.2);border-top-color:var(--gold-light);border-radius:50%;animation:spin 0.8s linear infinite;"></div><p style="margin-top:10px;font-weight:700;">⏳ Đang tải toàn bộ sản phẩm từ kho Supabase...</p></td></tr>`;
+        }
         await syncAdminProducts();
         renderProductTable();
         renderUserTable();
         renderAuditLogs();
         await renderOrdersTable();
       }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAdminDashboard);
+    } else {
+      initAdminDashboard();
+    }
   </script>
 </body>
 </html>
