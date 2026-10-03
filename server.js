@@ -20,6 +20,34 @@ const server = http.createServer((req, res) => {
     reqPath = '/index.html';
   }
 
+  // API Endpoint: Ghi nhận đơn hàng trực tiếp vào kho Supabase
+  if (req.method === 'POST' && reqPath === '/api/orders') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body);
+        const supabaseRes = await fetch('https://ukwuzbacxinidphzhftr.supabase.co/rest/v1/orders', {
+          method: 'POST',
+          headers: {
+            'apikey': 'sb_publishable_vHK1gIdoebQ-4WwaIjeEmg_elX97-SK',
+            'Authorization': 'Bearer sb_publishable_vHK1gIdoebQ-4WwaIjeEmg_elX97-SK',
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates,return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+        const resText = await supabaseRes.text();
+        res.writeHead(supabaseRes.status, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(resText);
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ error: err.message }));
+      }
+    });
+    return;
+  }
+
   const safePath = path.normalize(reqPath).replace(/^(\.\.[\/\\])+/, '');
   const filePath = path.join(__dirname, safePath);
 

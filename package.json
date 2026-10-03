@@ -1,0 +1,21 @@
+{
+  "name": "socola-chocorank",
+  "version": "1.0.0",
+  "description": "ChocoRank - Nền tảng thống kê & đánh giá socola và kẹo thượng hạng",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "chocolate",
+    "candy",
+    "chocorank"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
+    "pg": "^8.23.0"
+  }
+}

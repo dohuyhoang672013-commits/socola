@@ -435,7 +435,7 @@
       <!-- Quick 1-Click Demo Section -->
       <div class="demo-login-box">
         <div class="demo-login-title">
-          <span>⚡ Đăng Nhập Nhanh Giả Lập (Demo 1-Click):</span>
+          <span>⚡ Tài Khoản Mẫu Supabase Auth (1-Click):</span>
         </div>
         <div class="demo-buttons-grid">
           <button type="button" class="demo-btn" id="quickLoginGuestBtn" title="Đăng nhập tài khoản Khách Hàng">
@@ -617,6 +617,8 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase.js"></script>
   <script src="js/auth.js"></script>
   <script>
     // Tab Elements
@@ -631,12 +633,10 @@
 
     // Tab Switcher
     function switchTab(mode) {
-      // Remove active states from all buttons
       tabLoginBtn.classList.remove('active');
       tabRegisterGuestBtn.classList.remove('active');
       tabRegisterAdminBtn.classList.remove('active');
 
-      // Remove active states from all forms
       loginForm.classList.remove('active');
       registerGuestForm.classList.remove('active');
       registerAdminForm.classList.remove('active');
@@ -660,10 +660,17 @@
     tabRegisterGuestBtn.addEventListener('click', () => switchTab('register-guest'));
     tabRegisterAdminBtn.addEventListener('click', () => switchTab('register-admin'));
 
-    // Check URL parameters for direct tab navigation
+    // Check URL parameters for direct tab navigation or unauthorized access warning
     const urlParams = new URLSearchParams(window.location.search);
     const modeParam = urlParams.get('mode');
-    if (modeParam === 'register-admin') {
+    const unauthorizedParam = urlParams.get('unauthorized');
+
+    if (unauthorizedParam === '1') {
+      switchTab('login');
+      setTimeout(() => {
+        showToast('Khu vực Quản Trị chỉ dành riêng cho Admin! Vui lòng đăng nhập bằng tài khoản Quản Trị Viên.', 'danger');
+      }, 400);
+    } else if (modeParam === 'register-admin') {
       switchTab('register-admin');
     } else if (modeParam === 'register-guest' || modeParam === 'register') {
       switchTab('register-guest');
@@ -705,7 +712,7 @@
       toast.className = `toast toast-${type}`;
       toast.innerHTML = `<span>${type === 'success' ? '✓' : '⚠️'} ${msg}</span>`;
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3200);
+      setTimeout(() => toast.remove(), 3500);
     }
 
     // Helper redirect by role
@@ -714,106 +721,180 @@
         showToast('Xác thực quyền Admin thành công! Chuyển hướng vào Khu Quản Trị...', 'success');
         setTimeout(() => {
           window.location.href = 'admin.html';
-        }, 900);
+        }, 800);
       } else {
         showToast('Đăng nhập thành công! Chuyển hướng về Trang Khách Hàng...', 'success');
         setTimeout(() => {
           window.location.href = 'index.html';
-        }, 900);
+        }, 800);
       }
     }
 
     // 1-Click Quick Login: GUEST
-    document.getElementById('quickLoginGuestBtn').addEventListener('click', () => {
-      document.getElementById('loginEmail').value = 'khach@chocorank.com';
-      document.getElementById('loginPassword').value = '123456';
-      const res = loginUser('khach@chocorank.com', '123456');
-      if (res.success) {
-        redirectByRole(res.user);
-      }
-    });
+    const quickGuestBtn = document.getElementById('quickLoginGuestBtn');
+    if (quickGuestBtn) {
+      quickGuestBtn.addEventListener('click', async () => {
+        document.getElementById('loginEmail').value = 'khach@chocorank.com';
+        document.getElementById('loginPassword').value = '123456';
+        quickGuestBtn.disabled = true;
+        quickGuestBtn.style.opacity = '0.6';
+        showToast('Đang kết nối Supabase Auth...', 'info');
+        const res = await loginUser('khach@chocorank.com', '123456');
+        quickGuestBtn.disabled = false;
+        quickGuestBtn.style.opacity = '1';
+        if (res.success) {
+          redirectByRole(res.user);
+        } else {
+          showToast(res.message, 'danger');
+        }
+      });
+    }
 
     // 1-Click Quick Login: ADMIN
-    document.getElementById('quickLoginAdminBtn').addEventListener('click', () => {
-      document.getElementById('loginEmail').value = 'admin@chocorank.com';
-      document.getElementById('loginPassword').value = 'admin123';
-      const res = loginUser('admin@chocorank.com', 'admin123');
-      if (res.success) {
-        redirectByRole(res.user);
-      }
-    });
+    const quickAdminBtn = document.getElementById('quickLoginAdminBtn');
+    if (quickAdminBtn) {
+      quickAdminBtn.addEventListener('click', async () => {
+        document.getElementById('loginEmail').value = 'admin@chocorank.com';
+        document.getElementById('loginPassword').value = 'admin123';
+        quickAdminBtn.disabled = true;
+        quickAdminBtn.style.opacity = '0.6';
+        showToast('Đang kết nối Supabase Auth...', 'info');
+        const res = await loginUser('admin@chocorank.com', 'admin123');
+        quickAdminBtn.disabled = false;
+        quickAdminBtn.style.opacity = '1';
+        if (res.success) {
+          redirectByRole(res.user);
+        } else {
+          showToast(res.message, 'danger');
+        }
+      });
+    }
 
     // =========================================================================
-    // 1. FORM 1: LOGIN SUBMIT
+    // 1. FORM 1: LOGIN SUBMIT (Supabase Auth Thật)
     // =========================================================================
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
+      const submitBtn = document.getElementById('submitLoginBtn');
 
-      const result = loginUser(email, password);
-      if (result.success) {
-        redirectByRole(result.user);
-      } else {
-        showToast(result.message, 'danger');
+      const originalBtnHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳ Đang xác thực Supabase...</span>';
+
+      try {
+        const result = await loginUser(email, password);
+        if (result.success) {
+          redirectByRole(result.user);
+        } else {
+          showToast(result.message, 'danger');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      } catch (err) {
+        showToast('Lỗi kết nối máy chủ xác thực', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
       }
     });
 
     // =========================================================================
-    // 2. FORM 2: ĐĂNG KÝ KHÁCH HÀNG (CHỈ TẠO TÀI KHOẢN KHÁCH, KHÔNG CÓ ADMIN)
+    // 2. FORM 2: ĐĂNG KÝ KHÁCH HÀNG (Supabase Auth Thật)
     // =========================================================================
-    registerGuestForm.addEventListener('submit', (e) => {
+    registerGuestForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('regGuestName').value.trim();
       const email = document.getElementById('regGuestEmail').value.trim();
       const password = document.getElementById('regGuestPassword').value;
       const pref = document.querySelector('input[name="guestPreference"]:checked')?.value || 'choco';
       const avatar = pref === 'candy' ? '🍬' : (pref === 'both' ? '✨' : '🍫');
+      const submitBtn = document.getElementById('submitRegGuestBtn');
 
-      const result = registerUser({
-        name,
-        email,
-        password,
-        role: 'user', // Cố định tài khoản khách
-        avatar
-      });
+      const originalBtnHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳ Đang tạo tài khoản trên Supabase...</span>';
 
-      if (result.success) {
-        showToast('Chúc mừng! Đã tạo tài khoản Khách Hàng thành công.', 'success');
-        redirectByRole(result.user);
-      } else {
-        showToast(result.message, 'danger');
+      try {
+        const result = await registerUser({
+          name,
+          email,
+          password,
+          role: 'user',
+          avatar,
+          title: 'Thành Viên Sành Ăn (VIP)'
+        });
+
+        if (result.success) {
+          showToast('Chúc mừng! Đã tạo tài khoản Khách Hàng thành công.', 'success');
+          if (result.user) {
+            redirectByRole(result.user);
+          } else {
+            switchTab('login');
+            document.getElementById('loginEmail').value = email;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+          }
+        } else {
+          showToast(result.message, 'danger');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      } catch (err) {
+        showToast('Lỗi khi đăng ký tài khoản', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
       }
     });
 
     // =========================================================================
-    // 3. FORM 3: ĐĂNG KÝ QUẢN TRỊ VIÊN (BẮT BUỘC CÓ MÃ BẢO MẬT ADMIN)
+    // 3. FORM 3: ĐĂNG KÝ QUẢN TRỊ VIÊN (Supabase Auth Thật)
     // =========================================================================
-    registerAdminForm.addEventListener('submit', (e) => {
+    registerAdminForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('regAdminName').value.trim();
       const email = document.getElementById('regAdminEmail').value.trim();
       const password = document.getElementById('regAdminPassword').value;
       const adminSecretCode = document.getElementById('regAdminSecretCode').value.trim();
+      const submitBtn = document.getElementById('submitRegAdminBtn');
 
       if (!adminSecretCode) {
         showToast('Vui lòng nhập Mã Ủy Quyền Quản Trị Viên!', 'danger');
         return;
       }
 
-      const result = registerUser({
-        name,
-        email,
-        password,
-        role: 'admin', // Yêu cầu quyền admin
-        adminSecretCode
-      });
+      const originalBtnHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳ Đang xác thực & cấp quyền Admin...</span>';
 
-      if (result.success) {
-        showToast('Xác thực Mã Ủy Quyền thành công! Đã tạo tài khoản Admin.', 'success');
-        redirectByRole(result.user);
-      } else {
-        showToast(result.message, 'danger');
+      try {
+        const result = await registerUser({
+          name,
+          email,
+          password,
+          role: 'admin',
+          adminSecretCode
+        });
+
+        if (result.success) {
+          showToast('Xác thực Mã Ủy Quyền thành công! Đã tạo tài khoản Admin.', 'success');
+          if (result.user) {
+            redirectByRole(result.user);
+          } else {
+            switchTab('login');
+            document.getElementById('loginEmail').value = email;
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+          }
+        } else {
+          showToast(result.message, 'danger');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      } catch (err) {
+        showToast('Lỗi khi đăng ký tài khoản Admin', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
       }
     });
   </script>

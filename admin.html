@@ -8,8 +8,22 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="css/style.css">
+
+  <script>
+    // Early Security Guard: Chặn khu quản trị ngay lập tức, chuyển hướng về trang đăng nhập nếu không phải Admin
+    (function guardAdminPortal() {
+      try {
+        var rawUser = localStorage.getItem('chocorank_current_user');
+        var user = rawUser ? JSON.parse(rawUser) : null;
+        if (!user || user.role !== 'admin') {
+          window.location.replace('auth.html?unauthorized=1');
+        }
+      } catch (e) {
+        window.location.replace('auth.html?unauthorized=1');
+      }
+    })();
+  </script>
 
   <style>
     /* Admin Dashboard Specific Layout & Elements */
@@ -582,6 +596,7 @@
               <th>Thanh Toán</th>
               <th>Tổng Tiền</th>
               <th>Trạng Thái</th>
+              <th style="text-align: right;">Đổi Trạng Thái Kho</th>
             </tr>
           </thead>
           <tbody id="adminOrdersTableBody">
@@ -594,13 +609,13 @@
   </main>
 
   <!-- ========================================================================
-       MODAL: ADD/EDIT PRODUCT (MOCK CRUD)
+       MODAL: ADD/EDIT PRODUCT (SUPABASE CRUD THẬT)
        ======================================================================== -->
   <div class="modal-overlay" id="productFormModal">
-    <div class="modal-card" style="max-width: 560px;">
+    <div class="modal-card" style="max-width: 620px;">
       <button class="modal-close-btn" id="closeProdModalBtn">✕</button>
       <div class="section-header" style="margin-bottom: 20px; text-align: left;">
-        <span class="section-badge">QUẢN TRỊ NỘI DUNG</span>
+        <span class="section-badge">QUẢN TRỊ KHO SUPABASE</span>
         <h3 id="prodModalTitle" style="font-size: 1.5rem; margin-top: 4px;">Thêm Socola / Kẹo Mới</h3>
       </div>
 
@@ -622,31 +637,82 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="formProdBrand">Thương hiệu</label>
-            <input type="text" class="form-input" id="formProdBrand" placeholder="Marou, Lindt, Royce'...">
+            <label class="form-label" for="formProdCategory">Danh mục kho *</label>
+            <select class="form-input" id="formProdCategory" required>
+              <option value="dark">Socola Đen Thượng Hạng</option>
+              <option value="milk">Socola Sữa & Bơ</option>
+              <option value="artisanal">Socola Nghệ Nhân (Bean-to-Bar)</option>
+              <option value="nama">Socola Tươi (Nama)</option>
+              <option value="praline">Hộp Quà Praline Hoàng Gia</option>
+              <option value="white">Socola Trắng & Matcha</option>
+            </select>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
-            <label class="form-label" for="formProdPrice">Giá bán (VNĐ)</label>
-            <input type="text" class="form-input" id="formProdPrice" placeholder="135.000₫">
+            <label class="form-label" for="formProdBrand">Thương hiệu</label>
+            <input type="text" class="form-input" id="formProdBrand" placeholder="Marou, Lindt, Royce'...">
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="formProdRating">Điểm chuyên môn (1-10)</label>
+            <label class="form-label" for="formProdOrigin">Xuất xứ quốc gia</label>
+            <input type="text" class="form-input" id="formProdOrigin" placeholder="Việt Nam, Thụy Sĩ, Nhật Bản...">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="formProdPrice">Giá bán (VNĐ) *</label>
+            <input type="text" class="form-input" id="formProdPrice" required placeholder="135.000₫">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formProdCocoa">% Cacao</label>
+            <input type="number" min="0" max="100" class="form-input" id="formProdCocoa" value="70">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formProdRating">Điểm số (1-10)</label>
             <input type="number" step="0.1" min="1" max="10" class="form-input" id="formProdRating" value="9.5">
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="formProdOrigin">Xuất xứ quốc gia</label>
-          <input type="text" class="form-input" id="formProdOrigin" placeholder="Việt Nam, Thụy Sĩ, Nhật Bản...">
+          <label class="form-label" for="formProdImage">Ảnh sản phẩm (Có sẵn trong thư mục assets)</label>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <select class="form-input" id="formProdImage" style="flex: 1;">
+              <option value="assets/images/dark_chocolate.jpg">dark_chocolate.jpg (Socola Đen Cổ Điển)</option>
+              <option value="assets/images/marou_daklak.jpg">marou_daklak.jpg (Marou Đắk Lắk 70%)</option>
+              <option value="assets/images/marou_baria.jpg">marou_baria.jpg (Marou Bà Rịa 76%)</option>
+              <option value="assets/images/lindt_excellence_85.jpg">lindt_excellence_85.jpg (Lindt 85%)</option>
+              <option value="assets/images/valrhona_guanaja.jpg">valrhona_guanaja.jpg (Valrhona 70%)</option>
+              <option value="assets/images/ghirardelli_72.jpg">ghirardelli_72.jpg (Ghirardelli 72%)</option>
+              <option value="assets/images/royce_nama_au_lait.jpg">royce_nama_au_lait.jpg (Royce' Au Lait)</option>
+              <option value="assets/images/royce_nama_matcha.jpg">royce_nama_matcha.jpg (Royce' Matcha)</option>
+              <option value="assets/images/nama_chocolate.jpg">nama_chocolate.jpg (Nama Tươi)</option>
+              <option value="assets/images/godiva_gold.jpg">godiva_gold.jpg (Godiva Gold)</option>
+              <option value="assets/images/ferrero_rocher.jpg">ferrero_rocher.jpg (Ferrero Rocher)</option>
+              <option value="assets/images/guylian_seashells.jpg">guylian_seashells.jpg (Guylian Seashells)</option>
+              <option value="assets/images/praline_chocolate.jpg">praline_chocolate.jpg (Praline Hộp Quà)</option>
+              <option value="assets/images/tonys_caramel.jpg">tonys_caramel.jpg (Tony's Caramel)</option>
+              <option value="assets/images/toblerone_swiss.jpg">toblerone_swiss.jpg (Toblerone Tam Giác)</option>
+              <option value="assets/images/mms_peanut.jpg">mms_peanut.jpg (M&M's Peanut)</option>
+              <option value="assets/images/haribo_goldbears.jpg">haribo_goldbears.jpg (Haribo Gấu)</option>
+              <option value="assets/images/hichew_fruit.jpg">hichew_fruit.jpg (Hi-Chew Trái Cây)</option>
+              <option value="assets/images/ricola_herb.jpg">ricola_herb.jpg (Ricola Thảo Dược)</option>
+              <option value="assets/images/cavendish_harvey.jpg">cavendish_harvey.jpg (Cavendish & Harvey)</option>
+              <option value="assets/images/keo_cudo_hatinh.jpg">keo_cudo_hatinh.jpg (Kẹo Cu Đơ)</option>
+              <option value="assets/images/keo_dua_bentre.jpg">keo_dua_bentre.jpg (Kẹo Dừa Bến Tre)</option>
+              <option value="assets/images/werthers_caramel.jpg">werthers_caramel.jpg (Werther's Caramel)</option>
+            </select>
+            <img id="formProdImagePreview" src="assets/images/dark_chocolate.jpg" alt="Preview" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid var(--gold-primary);">
+          </div>
         </div>
 
         <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
           <button type="button" class="btn-reset-filters" id="cancelProdModalBtn">Hủy Bỏ</button>
-          <button type="submit" class="btn-primary" style="padding: 10px 24px;">Lưu Sản Phẩm</button>
+          <button type="submit" class="btn-primary" id="saveProdBtn" style="padding: 10px 24px;">Lưu Vào Kho Supabase</button>
         </div>
       </form>
     </div>
@@ -684,35 +750,35 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script>
     // Security Guard Check
     function checkAdminAccess() {
       const currentUser = getCurrentUser();
-      const accessModal = document.getElementById('accessDeniedModal');
 
       if (!currentUser || currentUser.role !== 'admin') {
-        accessModal.classList.add('active');
+        window.location.replace('auth.html?unauthorized=1');
         return false;
       }
 
       // Update admin UI info
       document.getElementById('adminName').textContent = currentUser.name;
       document.getElementById('adminAvatar').textContent = currentUser.avatar || '🛡️';
-      accessModal.classList.remove('active');
       return true;
     }
 
     // 1-Click login as admin from Guard
-    document.getElementById('guardQuickAdminLoginBtn').addEventListener('click', () => {
-      loginUser('admin@chocorank.com', 'admin123');
+    document.getElementById('guardQuickAdminLoginBtn').addEventListener('click', async () => {
+      await loginUser('admin@chocorank.com', 'admin123');
       window.location.reload();
     });
 
     // Admin Logout
-    document.getElementById('adminLogoutBtn').addEventListener('click', () => {
-      logoutUser();
+    document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
+      await logoutUser();
       window.location.href = 'auth.html';
     });
 
@@ -736,10 +802,20 @@
       setTimeout(() => toast.remove(), 2500);
     }
 
-    // Local copy of products for mock CRUD operations
+    // Danh sách sản phẩm được tải động từ kho Supabase
     let adminProducts = [];
-    if (typeof CHOCOLATE_DATA !== 'undefined') {
-      adminProducts = JSON.parse(JSON.stringify(CHOCOLATE_DATA));
+
+    async function syncAdminProducts() {
+      if (typeof loadProductsFromSupabase === 'function') {
+        const prods = await loadProductsFromSupabase();
+        adminProducts = prods.map(p => ({
+          ...p,
+          type: p.productType,
+          cocoaPercentage: p.cocoa,
+          score: p.scores?.overall || 9.5,
+          priceFormatted: formatCurrency(p.price)
+        }));
+      }
     }
 
     // Audit Logs
@@ -821,9 +897,12 @@
       }).join('');
     }
 
-    // Render User Management Table
-    function renderUserTable() {
+    // Render User Management Table (Đồng bộ tài khoản từ Supabase)
+    async function renderUserTable() {
       const tbody = document.getElementById('adminUserTableBody');
+      if (typeof syncProfilesFromSupabase === 'function') {
+        await syncProfilesFromSupabase();
+      }
       const users = getAllUsers();
       document.getElementById('kpiTotalUsers').textContent = users.length;
 
@@ -852,36 +931,97 @@
       }).join('');
     }
 
-    // Delete Product Mock
-    window.deleteProduct = function(id) {
+    // Delete Product (Xóa trực tiếp trên Supabase)
+    window.deleteProduct = async function(id) {
       const idx = adminProducts.findIndex(p => p.id === id);
       if (idx !== -1) {
-        const name = adminProducts[idx].name;
-        if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" khỏi danh sách quản lý?`)) {
-          adminProducts.splice(idx, 1);
+        const item = adminProducts[idx];
+        const name = item.name;
+        if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" khỏi kho Supabase không?\nThao tác này sẽ xóa vĩnh viễn trên cơ sở dữ liệu.`)) {
+          showToast(`Đang xóa "${name}" trên Supabase...`, 'info');
+          if (typeof deleteProductFromSupabase === 'function') {
+            const res = await deleteProductFromSupabase(id);
+            if (!res.success) {
+              showToast(`Lỗi khi xóa trên kho: ${res.error}`, 'danger');
+              return;
+            }
+          }
+          await syncAdminProducts();
           renderProductTable();
           auditLogs.unshift({
             time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-            action: `Admin đã xóa sản phẩm: ${name}`
+            action: `Admin đã xóa sản phẩm "${name}" khỏi kho Supabase.`
           });
           renderAuditLogs();
-          showToast(`Đã xóa sản phẩm "${name}" thành công!`, 'success');
+          showToast(`Đã xóa sản phẩm "${name}" khỏi kho Supabase thành công!`, 'success');
         }
       }
     };
 
-    // Edit Product Mock
+    // Helper: Cập nhật danh sách danh mục theo loại sản phẩm
+    function updateCategoryDropdown(productType, selectedCatId = '') {
+      const catSelect = document.getElementById('formProdCategory');
+      if (!catSelect) return;
+
+      if (productType === 'candy') {
+        catSelect.innerHTML = `
+          <option value="candy-gummy">Kẹo Dẻo & Kẹo Mềm (Gummy)</option>
+          <option value="candy-caramel">Kẹo Bơ & Toffee Caramel</option>
+          <option value="candy-herbal">Kẹo Thảo Dược & Ngậm</option>
+          <option value="candy-fruit">Kẹo Trái Cây Thủy Tinh (Hộp Thiếc)</option>
+          <option value="candy-nut">Kẹo Hạt Giòn Bọc Đường</option>
+          <option value="candy-traditional">Kẹo Dân Gian (Dừa Bến Tre, Cu Đơ)</option>
+        `;
+      } else {
+        catSelect.innerHTML = `
+          <option value="dark">Socola Đen Thượng Hạng</option>
+          <option value="milk">Socola Sữa & Bơ</option>
+          <option value="artisanal">Socola Nghệ Nhân (Bean-to-Bar)</option>
+          <option value="nama">Socola Tươi (Nama)</option>
+          <option value="praline">Hộp Quà Praline Hoàng Gia</option>
+          <option value="white">Socola Trắng & Matcha</option>
+        `;
+      }
+
+      if (selectedCatId) {
+        catSelect.value = selectedCatId;
+      }
+    }
+
+    // Toggle options when type changes
+    document.getElementById('formProdType')?.addEventListener('change', (e) => {
+      updateCategoryDropdown(e.target.value);
+    });
+
+    // Toggle image preview when select changes
+    document.getElementById('formProdImage')?.addEventListener('change', (e) => {
+      const preview = document.getElementById('formProdImagePreview');
+      if (preview) preview.src = e.target.value;
+    });
+
+    // Edit Product
     window.editProduct = function(id) {
       const item = adminProducts.find(p => p.id === id);
       if (!item) return;
 
       document.getElementById('formProdId').value = item.id;
       document.getElementById('formProdName').value = item.name;
-      document.getElementById('formProdType').value = item.type || 'chocolate';
-      document.getElementById('formProdBrand').value = item.brand;
-      document.getElementById('formProdPrice').value = item.priceFormatted || item.price;
-      document.getElementById('formProdRating').value = item.score || 9.5;
+      const type = item.type || item.productType || 'chocolate';
+      document.getElementById('formProdType').value = type;
+      updateCategoryDropdown(type, item.category || item.category_id);
+
+      document.getElementById('formProdBrand').value = item.brand || '';
+      document.getElementById('formProdPrice').value = item.price ? (typeof item.price === 'number' ? formatCurrency(item.price) : item.price) : '150.000₫';
+      document.getElementById('formProdRating').value = item.score || item.scores?.overall || 9.5;
       document.getElementById('formProdOrigin').value = item.origin || '';
+      document.getElementById('formProdCocoa').value = item.cocoaPercentage ?? item.cocoa ?? 70;
+
+      const imgSelect = document.getElementById('formProdImage');
+      if (item.image && imgSelect.querySelector(`option[value="${item.image}"]`)) {
+        imgSelect.value = item.image;
+      }
+      const preview = document.getElementById('formProdImagePreview');
+      if (preview) preview.src = imgSelect.value;
 
       document.getElementById('prodModalTitle').textContent = `Chỉnh Sửa: ${item.name}`;
       document.getElementById('productFormModal').classList.add('active');
@@ -892,61 +1032,99 @@
     document.getElementById('openAddProductModalBtn').addEventListener('click', () => {
       document.getElementById('adminProductForm').reset();
       document.getElementById('formProdId').value = '';
-      document.getElementById('prodModalTitle').textContent = 'Thêm Socola / Kẹo Mới';
+      updateCategoryDropdown('chocolate', 'dark');
+      const imgSelect = document.getElementById('formProdImage');
+      imgSelect.value = 'assets/images/dark_chocolate.jpg';
+      const preview = document.getElementById('formProdImagePreview');
+      if (preview) preview.src = imgSelect.value;
+
+      document.getElementById('prodModalTitle').textContent = 'Thêm Socola / Kẹo Mới Vào Kho';
       prodModal.classList.add('active');
     });
 
     document.getElementById('closeProdModalBtn').addEventListener('click', () => prodModal.classList.remove('active'));
     document.getElementById('cancelProdModalBtn').addEventListener('click', () => prodModal.classList.remove('active'));
 
-    // Handle Add / Update Product Submit
-    document.getElementById('adminProductForm').addEventListener('submit', (e) => {
+    // Handle Add / Update Product Submit (Lưu trực tiếp vào kho Supabase)
+    document.getElementById('adminProductForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const saveBtn = document.getElementById('saveProdBtn');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span>⏳ Đang ghi vào Supabase...</span>';
+
       const id = document.getElementById('formProdId').value;
       const name = document.getElementById('formProdName').value.trim();
       const type = document.getElementById('formProdType').value;
+      const categoryId = document.getElementById('formProdCategory').value;
       const brand = document.getElementById('formProdBrand').value.trim() || 'Thủ Công';
-      const price = document.getElementById('formProdPrice').value.trim() || '150.000₫';
+      const rawPrice = document.getElementById('formProdPrice').value.trim();
+      const numericPrice = parseInt(rawPrice.replace(/[^0-9]/g, ''), 10) || 150000;
       const score = parseFloat(document.getElementById('formProdRating').value) || 9.5;
       const origin = document.getElementById('formProdOrigin').value.trim() || 'Việt Nam';
+      const cocoa = parseInt(document.getElementById('formProdCocoa').value, 10) || (type === 'chocolate' ? 70 : 0);
+      const image = document.getElementById('formProdImage').value;
 
-      if (id) {
-        // Update existing
-        const item = adminProducts.find(p => p.id === id);
-        if (item) {
-          item.name = name;
-          item.type = type;
-          item.brand = brand;
-          item.priceFormatted = price;
-          item.score = score;
-          item.origin = origin;
-          showToast(`Đã cập nhật sản phẩm "${name}"!`, 'success');
+      try {
+        if (id) {
+          // Update existing trên Supabase
+          showToast(`Đang cập nhật "${name}" lên kho Supabase...`, 'info');
+          const res = await updateProductInSupabase(id, {
+            name,
+            product_type: type,
+            category_id: categoryId,
+            brand,
+            price: numericPrice,
+            scores: { overall: score, taste: score, aroma: score, value: score, texture: score },
+            origin,
+            cocoa_percentage: cocoa,
+            image_url: image
+          });
+
+          if (!res.success) {
+            showToast(`Lỗi cập nhật: ${res.error}`, 'danger');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+            return;
+          }
+          showToast(`Đã cập nhật sản phẩm "${name}" trên kho Supabase!`, 'success');
+        } else {
+          // Thêm mới vào kho Supabase
+          const newId = 'prod-' + Date.now();
+          showToast(`Đang thêm mới "${name}" vào kho Supabase...`, 'info');
+          const res = await addProductToSupabase({
+            id: newId,
+            name: name,
+            type: type,
+            category_id: categoryId,
+            brand: brand,
+            price: numericPrice,
+            score: score,
+            scores: { overall: score, taste: score, aroma: score, value: score, texture: score },
+            origin: origin,
+            cocoaPercentage: cocoa,
+            image: image,
+            rank: adminProducts.length + 1
+          });
+
+          if (!res.success) {
+            showToast(`Lỗi thêm mới: ${res.error}`, 'danger');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+            return;
+          }
+          showToast(`Đã thêm mới thành công "${name}" vào kho Supabase!`, 'success');
         }
-      } else {
-        // Add new
-        const newProd = {
-          id: 'prod-' + Date.now(),
-          name: name,
-          type: type,
-          brand: brand,
-          priceFormatted: price,
-          score: score,
-          origin: origin,
-          cocoaPercentage: type === 'chocolate' ? 70 : 0,
-          image: type === 'chocolate' ? 'assets/images/dark_chocolate.jpg' : 'assets/images/hichew_fruit.jpg',
-          rank: adminProducts.length + 1
-        };
-        adminProducts.unshift(newProd);
-        auditLogs.unshift({
-          time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-          action: `Admin vừa tạo mới sản phẩm: ${name}`
-        });
-        showToast(`Đã thêm mới thành công "${name}"!`, 'success');
-      }
 
-      prodModal.classList.remove('active');
-      renderProductTable();
-      renderAuditLogs();
+        await syncAdminProducts();
+        renderProductTable();
+        prodModal.classList.remove('active');
+      } catch (err) {
+        showToast(`Lỗi kết nối kho: ${err.message}`, 'danger');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+      }
     });
 
     // Search and filter listeners
@@ -996,14 +1174,25 @@
       renderOrdersTable();
     });
 
-    function renderOrdersTable(query = '') {
+    // Render Orders Table (Tải đơn thật từ kho Supabase)
+    async function renderOrdersTable(query = '') {
       const tbody = document.getElementById('adminOrdersTableBody');
       const badge = document.getElementById('adminOrderBadge');
       if (!tbody) return;
 
-      const raw = localStorage.getItem('chocorank_orders');
       let orders = [];
-      try { orders = raw ? JSON.parse(raw) : []; } catch(e) {}
+      if (typeof loadOrdersFromSupabase === 'function') {
+        try {
+          orders = await loadOrdersFromSupabase();
+        } catch (e) {
+          console.warn('Lỗi tải đơn hàng từ Supabase:', e);
+        }
+      }
+
+      if (!orders || orders.length === 0) {
+        const raw = localStorage.getItem('chocorank_orders');
+        try { orders = raw ? JSON.parse(raw) : []; } catch(e) {}
+      }
 
       if (badge) badge.textContent = orders.length;
 
@@ -1020,7 +1209,7 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-muted);">
+            <td colspan="9" style="text-align: center; padding: 30px; color: var(--text-muted);">
               Chưa có đơn hàng nào được đặt hoặc không tìm thấy đơn phù hợp.
             </td>
           </tr>
@@ -1028,45 +1217,83 @@
         return;
       }
 
-      tbody.innerHTML = filtered.map(o => `
-        <tr>
-          <td><strong style="color: var(--gold-light); font-family: monospace;">${o.orderId}</strong></td>
-          <td style="font-size: 0.82rem; color: var(--text-muted);">${o.date || 'Vừa xong'}</td>
-          <td>
-            <strong>${o.customer?.name || 'Khách vãng lai'}</strong>
-            <div style="font-size: 0.78rem; color: var(--gold-light);">${o.customer?.phone || ''}</div>
-          </td>
-          <td style="font-size: 0.82rem; max-width: 200px;">${o.customer?.address || 'Tại cửa hàng'}</td>
-          <td style="font-size: 0.82rem;">
-            ${(o.items || []).map(i => `<div>• ${i.name} <strong>x${i.quantity || 1}</strong></div>`).join('')}
-          </td>
-          <td style="font-size: 0.82rem; color: var(--text-muted);">${o.paymentMethod || 'COD'}</td>
-          <td><strong style="color: var(--gold-light);">${formatCurrency(o.grandTotal || 0)}</strong></td>
-          <td>
-            <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 0.75rem; padding: 3px 8px; border-radius: var(--radius-full); font-weight: 700;">
-              ✓ ${o.status || 'Chờ giao hàng'}
-            </span>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = filtered.map(o => {
+        let badgeColor = 'background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3);';
+        let statusIcon = '⏳';
+        if (o.status === 'Đang giao') {
+          badgeColor = 'background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);';
+          statusIcon = '🚚';
+        } else if (o.status === 'Đã giao') {
+          badgeColor = 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);';
+          statusIcon = '✅';
+        } else if (o.status === 'Đã hủy') {
+          badgeColor = 'background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);';
+          statusIcon = '❌';
+        }
+
+        return `
+          <tr>
+            <td><strong style="color: var(--gold-light); font-family: monospace;">${o.orderId}</strong></td>
+            <td style="font-size: 0.82rem; color: var(--text-muted);">${o.date || 'Vừa xong'}</td>
+            <td>
+              <strong>${o.customer?.name || 'Khách vãng lai'}</strong>
+              <div style="font-size: 0.78rem; color: var(--gold-light);">${o.customer?.phone || ''}</div>
+            </td>
+            <td style="font-size: 0.82rem; max-width: 200px;">${o.customer?.address || 'Tại cửa hàng'}</td>
+            <td style="font-size: 0.82rem;">
+              ${(o.items || []).map(i => `<div>• ${i.name} <strong>x${i.quantity || 1}</strong></div>`).join('')}
+            </td>
+            <td style="font-size: 0.82rem; color: var(--text-muted);">${o.paymentMethod || 'COD'}</td>
+            <td><strong style="color: var(--gold-light);">${formatCurrency(o.grandTotal || 0)}</strong></td>
+            <td>
+              <span style="display: inline-block; font-size: 0.75rem; padding: 4px 8px; border-radius: var(--radius-full); font-weight: 700; ${badgeColor}">
+                ${statusIcon} ${o.status || 'Chờ giao hàng'}
+              </span>
+            </td>
+            <td style="text-align: right;">
+              <select class="admin-status-dropdown" onchange="changeOrderStatus('${o.orderId}', this.value)" style="padding: 6px 10px; background: var(--bg-surface); border: 1px solid rgba(212,175,55,0.3); border-radius: var(--radius-sm); color: var(--gold-light); font-size: 0.8rem; font-weight: 600; cursor: pointer; outline: none;">
+                <option value="Chờ giao hàng" ${o.status === 'Chờ giao hàng' || o.status === 'Mới' ? 'selected' : ''}>⏳ Chờ giao hàng (Mới)</option>
+                <option value="Đang giao" ${o.status === 'Đang giao' ? 'selected' : ''}>🚚 Đang giao</option>
+                <option value="Đã giao" ${o.status === 'Đã giao' ? 'selected' : ''}>✅ Đã giao</option>
+                <option value="Đã hủy" ${o.status === 'Đã hủy' ? 'selected' : ''}>❌ Đã hủy</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
+
+    // Đổi trạng thái đơn hàng thật trên kho Supabase
+    window.changeOrderStatus = async function(orderId, newStatus) {
+      showToast(`Đang cập nhật đơn #${orderId} sang "${newStatus}"...`, 'info');
+      if (typeof updateOrderStatusInSupabase === 'function') {
+        const res = await updateOrderStatusInSupabase(orderId, newStatus);
+        if (res.success) {
+          showToast(`Đã đổi trạng thái đơn #${orderId} sang "${newStatus}" trên kho Supabase!`, 'success');
+          await renderOrdersTable();
+        } else {
+          showToast(`Lỗi đổi trạng thái: ${res.error}`, 'danger');
+        }
+      }
+    };
 
     document.getElementById('adminOrderSearch')?.addEventListener('input', (e) => {
       renderOrdersTable(e.target.value);
     });
 
-    document.getElementById('refreshOrdersBtn')?.addEventListener('click', () => {
-      renderOrdersTable();
-      showToast('Đã làm mới danh sách đơn hàng!', 'info');
+    document.getElementById('refreshOrdersBtn')?.addEventListener('click', async () => {
+      await renderOrdersTable();
+      showToast('Đã làm mới danh sách đơn hàng từ Supabase!', 'info');
     });
 
     // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       if (checkAdminAccess()) {
+        await syncAdminProducts();
         renderProductTable();
         renderUserTable();
         renderAuditLogs();
-        renderOrdersTable();
+        await renderOrdersTable();
       }
     });
   </script>

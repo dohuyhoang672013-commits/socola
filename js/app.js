@@ -99,16 +99,73 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // =========================================================================
-  // INITIALIZATION
+  // INITIALIZATION & SUPABASE INTEGRATION
   // =========================================================================
-  function init() {
+  async function init() {
+    // 1. Gắn sự kiện giao diện và giỏ hàng trước
+    bindEvents();
+    updateWishlistBadge();
+
+    // 2. Hiển thị loading skeleton mượt mà trong khi nạp dữ liệu từ kho Supabase
+    if (elements.chocolateGrid) {
+      elements.chocolateGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 70px 20px;">
+          <div style="display: inline-block; width: 44px; height: 44px; border: 3px solid rgba(212,175,55,0.25); border-top-color: var(--gold-light); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+          <p style="margin-top: 18px; color: var(--gold-light); font-weight: 700; font-size: 1.05rem;">
+            Đang kết nối & tải dữ liệu sản phẩm từ kho Supabase...
+          </p>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">
+            Đồng bộ danh mục và các món đang bán thời gian thực
+          </span>
+        </div>
+      `;
+    }
+
+    // 3. Tải dữ liệu động từ kho Supabase (forceRefresh: true để luôn lấy dữ liệu mới nhất)
+    if (typeof loadProductsFromSupabase === 'function') {
+      try {
+        await loadProductsFromSupabase(true);
+      } catch (err) {
+        console.error('[App] Lỗi kết nối kho Supabase:', err);
+      }
+    }
+
+    // 4. Render các thành phần giao diện với dữ liệu trực tuyến từ Supabase
+    renderHeroHighlight();
     renderStatistics();
     renderCategoryPills();
     renderChocolates();
     renderEatingStyles();
     renderAuthenticityCases();
-    updateWishlistBadge();
-    bindEvents();
+  }
+
+  function renderHeroHighlight() {
+    if (!CHOCOLATE_DATA || CHOCOLATE_DATA.length === 0) return;
+    const topItem = CHOCOLATE_DATA.find(i => i.rank === 1 && i.productType === 'chocolate') || CHOCOLATE_DATA[0];
+    if (!topItem) return;
+
+    const heroCard = document.querySelector('.hero-card');
+    if (heroCard) {
+      const img = heroCard.querySelector('.hero-card-img');
+      const badge = heroCard.querySelector('.hero-card-badge');
+      const title = heroCard.querySelector('.hero-card-content h3');
+      const desc = heroCard.querySelector('.hero-card-content p');
+      const price = heroCard.querySelector('.hero-card-price');
+      const score = heroCard.querySelector('.hero-card-footer span[style*="font-size: 1.4rem"]');
+
+      if (img) { img.src = topItem.image; img.alt = topItem.name; }
+      if (badge && topItem.badge) badge.textContent = topItem.badge;
+      if (title) title.textContent = topItem.name;
+      if (desc && topItem.description) desc.textContent = topItem.description.slice(0, 110) + '...';
+      if (price) price.textContent = formatCurrency(topItem.price);
+      if (score && topItem.scores?.overall) score.textContent = `★ ${topItem.scores.overall} / 10`;
+    }
+
+    const chocoCount = CHOCOLATE_DATA.filter(p => p.productType === 'chocolate').length;
+    const statItem = document.querySelector('.hero-stats .stat-item .stat-number');
+    if (statItem && chocoCount > 0) {
+      statItem.textContent = `${chocoCount}+`;
+    }
   }
 
   // =========================================================================
@@ -117,10 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderCategoryPills() {
     if (!elements.categoryPillsContainer) return;
 
+    const allData = CHOCOLATE_DATA || [];
+    const chocoTotal = allData.filter(p => p.productType === 'chocolate').length;
+    const candyTotal = allData.filter(p => p.productType === 'candy').length;
+    const allTotal = allData.length;
+
     let pills = [];
     if (state.productType === 'chocolate') {
       pills = [
-        { id: 'all', label: 'Tất Cả Socola (12)' },
+        { id: 'all', label: `Tất Cả Socola (${chocoTotal})` },
         { id: 'dark', label: 'Socola Đen Thượng Hạng' },
         { id: 'nama', label: 'Socola Tươi (Nama)' },
         { id: 'artisanal', label: 'Socola Nghệ Nhân (Bean-to-Bar)' },
@@ -130,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
     } else if (state.productType === 'candy') {
       pills = [
-        { id: 'all', label: 'Tất Cả Kẹo (8)' },
+        { id: 'all', label: `Tất Cả Kẹo (${candyTotal})` },
         { id: 'candy-gummy', label: 'Kẹo Dẻo & Kẹo Mềm (Gummy)' },
         { id: 'candy-caramel', label: 'Kẹo Bơ & Toffee Caramel' },
         { id: 'candy-herbal', label: 'Kẹo Thảo Dược & Ngậm' },
@@ -140,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
     } else {
       pills = [
-        { id: 'all', label: 'Tất Cả (20 Món)' },
+        { id: 'all', label: `Tất Cả (${allTotal} Món)` },
         { id: 'dark', label: 'Socola Đen' },
         { id: 'nama', label: 'Socola Tươi (Nama)' },
         { id: 'praline', label: 'Praline & Hạt Phỉ' },
@@ -263,7 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // FILTERING & SORTING LOGIC
   // =========================================================================
   function getFilteredChocolates() {
-    let list = [...CHOCOLATE_DATA];
+    const dataSource = (typeof window !== 'undefined' && Array.isArray(window.CHOCOLATE_DATA) && window.CHOCOLATE_DATA.length > 0)
+      ? window.CHOCOLATE_DATA
+      : (typeof CHOCOLATE_DATA !== 'undefined' && Array.isArray(CHOCOLATE_DATA) ? CHOCOLATE_DATA : []);
+    let list = [...dataSource];
 
     // Wishlist filter
     if (state.showOnlyWishlist) {
@@ -342,17 +407,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!elements.chocolateGrid) return;
 
     if (list.length === 0) {
-      const emptyIcon = state.productType === 'candy' ? '🍬🔍' : '🍫🔍';
-      const emptyText = state.productType === 'candy' ? 'Không tìm thấy loại kẹo phù hợp' : 'Không tìm thấy loại socola phù hợp';
+      const emptyIcon = state.productType === 'candy' ? '🍬🔍' : (state.productType === 'chocolate' ? '🍫🔍' : '✨🔍');
+      const emptyText = state.productType === 'candy' ? 'Không tìm thấy loại kẹo phù hợp' : (state.productType === 'chocolate' ? 'Không tìm thấy loại socola phù hợp' : 'Không tìm thấy sản phẩm nào phù hợp');
       elements.chocolateGrid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--bg-surface); border-radius: var(--radius-lg); border: 1px dashed var(--bg-glass-border);">
           <div style="font-size: 3rem; margin-bottom: 12px;">${emptyIcon}</div>
           <h3 style="font-size: 1.4rem; margin-bottom: 8px;">${emptyText}</h3>
           <p style="color: var(--text-muted); margin-bottom: 20px;">Vui lòng thử tìm với từ khóa khác hoặc đặt lại bộ lọc tìm kiếm.</p>
-          <button id="resetEmptyBtn" class="btn-primary">Đặt Lại Bộ Lọc</button>
+          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <button id="resetEmptyBtn" class="btn-primary" style="cursor: pointer;">↺ Đặt Lại Bộ Lọc</button>
+            <button id="showAllEmptyBtn" class="btn-secondary" style="cursor: pointer; border: 1px solid var(--gold-light); color: var(--gold-light); background: rgba(212,175,55,0.1); padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 600;">✨ Hiển Thị Tất Cả (Socola & Kẹo)</button>
+          </div>
         </div>
       `;
       document.getElementById('resetEmptyBtn')?.addEventListener('click', resetFilters);
+      document.getElementById('showAllEmptyBtn')?.addEventListener('click', () => {
+        setRankingMode('all');
+        resetFilters();
+      });
       return;
     }
 
@@ -379,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </button>
 
           <div class="card-image-wrap">
-            <img class="card-image" src="${item.image}" alt="${item.name}" loading="lazy">
+            <img class="card-image" src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
             <div class="card-badge">${item.badge}</div>
           </div>
 
@@ -1295,45 +1367,62 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function finishQuiz() {
+    const dataSource = (typeof window !== 'undefined' && Array.isArray(window.CHOCOLATE_DATA) && window.CHOCOLATE_DATA.length > 0)
+      ? window.CHOCOLATE_DATA
+      : (typeof CHOCOLATE_DATA !== 'undefined' && Array.isArray(CHOCOLATE_DATA) && CHOCOLATE_DATA.length > 0 ? CHOCOLATE_DATA : []);
+
     let matchedItem;
     let matchReason = '';
 
     if (state.quizType === 'candy') {
-      const ans1 = state.quizAnswers[0]; // texture
-      const ans2 = state.quizAnswers[1]; // flavor
-      const ans3 = state.quizAnswers[2]; // context
+      const ans1 = state.quizAnswers[0] || 'gummy';       // texture
+      const ans2 = state.quizAnswers[1] || 'fruit';       // flavor
+      const ans3 = state.quizAnswers[2] || 'snack';       // context / occasion
 
       if (ans2 === 'herb' || ans3 === 'throat' || ans1 === 'herbal') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'ricola-original-herb') || CHOCOLATE_DATA[14];
+        matchedItem = dataSource.find(c => c.id === 'ricola-original-herb');
         matchReason = 'Hương vị 13 loại thảo mộc núi tuyết Alps tự nhiên làm dịu họng, thông mũi và mang lại hơi thở thơm mát tức thì!';
       } else if (ans3 === 'tea' || ans1 === 'traditional') {
         if (ans2 === 'nut' || (ans1 === 'traditional' && ans3 === 'tea' && ans2 !== 'fruit')) {
-          matchedItem = CHOCOLATE_DATA.find(c => c.id === 'keo-cu-do-hatinh') || CHOCOLATE_DATA[19];
+          matchedItem = dataSource.find(c => c.id === 'keo-cu-do-hatinh');
           matchReason = 'Mật mía gừng già cay ấm áp kết hợp lạc giòn kẹp bánh tráng nướng, cực kỳ tuyệt vời khi nhâm nhi cùng trà xanh!';
         } else {
-          matchedItem = CHOCOLATE_DATA.find(c => c.id === 'keo-dua-sap-bentre') || CHOCOLATE_DATA[18];
+          matchedItem = dataSource.find(c => c.id === 'keo-dua-sap-bentre');
           matchReason = 'Độ dẻo béo ngậy 100% từ nước cốt dừa sáp tự nhiên Bến Tre, tinh hoa ẩm thực dân gian truyền thống trứ danh!';
         }
       } else if (ans1 === 'caramel' || ans2 === 'butter') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'werthers-original-caramel') || CHOCOLATE_DATA[13];
+        matchedItem = dataSource.find(c => c.id === 'werthers-original-caramel');
         matchReason = 'Kẹo bơ kem caramel nấu chậm từ năm 1903 ngậy thơm quý phái, ngậm tan chậm rãi êm ái!';
       } else if (ans3 === 'luxury') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'cavendish-harvey-fruit') || CHOCOLATE_DATA[15];
+        matchedItem = dataSource.find(c => c.id === 'cavendish-harvey-fruit');
         matchReason = 'Hộp thiếc vàng ánh kim hoàng gia chứa từng viên kẹo thủy tinh lấp lánh đượm nước ép trái cây mọng nước!';
       } else if (ans2 === 'nut') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'mms-peanut-candy') || CHOCOLATE_DATA[17];
+        matchedItem = dataSource.find(c => c.id === 'mms-peanut-candy');
         matchReason = 'Đậu phộng rang giòn rụm bọc socola và vỏ kẹo đa sắc màu, ăn vặt giải trí siêu giòn bùi vui nhộn!';
       } else if (ans2 === 'fruit' && ans1 === 'gummy') {
         if (ans3 === 'snack') {
-          matchedItem = CHOCOLATE_DATA.find(c => c.id === 'haribo-goldbears') || CHOCOLATE_DATA[12];
+          matchedItem = dataSource.find(c => c.id === 'haribo-goldbears');
           matchReason = 'Chú gấu vàng huyền thoại dai dẻo nhai sần sật với 6 vị nước ép trái cây tự nhiên không dính răng!';
         } else {
-          matchedItem = CHOCOLATE_DATA.find(c => c.id === 'morinaga-hi-chew') || CHOCOLATE_DATA[16];
+          matchedItem = dataSource.find(c => c.id === 'morinaga-hi-chew');
           matchReason = 'Công nghệ nhồi nhân đôi độc quyền của Nhật Bản, lớp sữa mềm bọc nước ép nho & dâu tươi bùng nổ vị giác!';
         }
       } else {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'haribo-goldbears') || CHOCOLATE_DATA[12];
+        matchedItem = dataSource.find(c => c.id === 'haribo-goldbears') || dataSource.find(c => c.productType === 'candy');
         matchReason = 'Loại kẹo dẻo được yêu thích số 1 hành tinh, vị chua ngọt thanh mát tự nhiên và nhai cực đã miệng!';
+      }
+
+      if (!matchedItem) {
+        matchedItem = dataSource.find(c => c.productType === 'candy') || {
+          id: 'haribo-goldbears',
+          name: 'Kẹo Dẻo Haribo Goldbären (Goldbears)',
+          brand: 'Haribo',
+          origin: 'Đức 🇩🇪',
+          price: 38000,
+          badge: '🐻 Kẹo Dẻo Gấu Bán Chạy Nhất Thế Giới',
+          candyFeature: '100% Nước Ép Trái Cây Tự Nhiên',
+          image: 'assets/images/haribo_goldbears.jpg'
+        };
       }
 
       const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
@@ -1346,10 +1435,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">${matchReason}</p>
           
           <div style="background: var(--bg-surface-elevated); border: 1px solid rgba(236, 72, 153, 0.4); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; gap: 20px; text-align: left; margin-bottom: 24px;">
-            <img src="${matchedItem.image}" alt="${matchedItem.name}" style="width: 90px; height: 90px; object-fit: cover; border-radius: var(--radius-sm);">
+            <img src="${matchedItem.image}" alt="${matchedItem.name}" style="width: 90px; height: 90px; object-fit: cover; border-radius: var(--radius-sm);" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
             <div>
               <div style="color: #f472b6; font-weight: 700;">${matchedItem.badge}</div>
-              <div style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0;">${matchedItem.origin} • 🍬 ${matchedItem.candyFeature}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0;">${matchedItem.origin} • 🍬 ${matchedItem.candyFeature || 'Kẹo Thượng Hạng'}</div>
               <div style="font-size: 1.15rem; font-weight: 800; color: #f472b6;">${formatCurrency(matchedItem.price)}</div>
             </div>
           </div>
@@ -1379,32 +1468,77 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('btnQuizRestart')?.addEventListener('click', () => startQuiz('candy'));
       document.getElementById('btnSwitchToChocoQuiz')?.addEventListener('click', () => startQuiz('chocolate'));
     } else {
-      // Chocolate Quiz calculation
-      const ans1 = state.quizAnswers[0];
-      const ans2 = state.quizAnswers[1];
-      const ans3 = state.quizAnswers[2];
+      // Chocolate Quiz calculation (Phân tích toàn diện: Vị giác ans1 + Mục đích ans2 + Mức giá ans3)
+      const ans1 = state.quizAnswers[0] || 'dark';     // 'dark' | 'nama' | 'praline' | 'milk'
+      const ans2 = state.quizAnswers[1] || 'health';   // 'health' | 'luxury' | 'artisan' | 'budget'
+      const ans3 = state.quizAnswers[2] || 'mid';      // 'low' | 'mid' | 'high'
 
-      matchedItem = CHOCOLATE_DATA[0];
-
-      if (ans2 === 'health' || ans1 === 'dark') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'lindt-excellence-85') || CHOCOLATE_DATA[0];
-        matchReason = 'Độ đắng 85% cacao thuần khiết, cực ít đường và giàu chất chống oxy hóa bảo vệ sức khỏe!';
-      } else if (ans2 === 'luxury') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'godiva-gold-collection') || CHOCOLATE_DATA[1];
-        matchReason = 'Hộp quà vàng hoàng gia Bỉ sang trọng bậc nhất thế giới với nhân praline hạt phỉ thơm lừng!';
-      } else if (ans1 === 'nama') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'royce-nama-au-lait') || CHOCOLATE_DATA[1];
-        matchReason = 'Độ mềm mướt tan chảy số 1 châu Á kết hợp kem tươi Hokkaido và bột cacao nhung mịn!';
-      } else if (ans1 === 'praline' || ans2 === 'budget') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'ferrero-rocher-gold') || CHOCOLATE_DATA[4];
-        matchReason = 'Cấu trúc 4 tầng giòn tan bọc hạt phỉ giã nhỏ và kem chocolate hạt dẻ Nutella béo bùi!';
-      } else if (ans2 === 'artisan') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'marou-daklak-70') || CHOCOLATE_DATA[0];
-        matchReason = 'Tuyệt tác Bean-to-bar Đắk Lắk được New York Times ca ngợi tinh tế và lôi cuốn nhất thế giới!';
+      if (ans1 === 'nama') {
+        if (ans3 === 'high' || ans2 === 'luxury') {
+          matchedItem = dataSource.find(c => c.id === 'royce-nama-matcha') || dataSource.find(c => c.id === 'royce-nama-au-lait');
+          matchReason = 'Đỉnh cao socola tươi Nama Nhật Bản với lớp bột trà xanh Uji / kem sữa tươi béo ngậy tan chảy tức thì như tuyết mùa đông!';
+        } else {
+          matchedItem = dataSource.find(c => c.id === 'royce-nama-au-lait');
+          matchReason = 'Độ mềm mướt tan chảy số 1 châu Á kết hợp kem tươi nguyên chất Hokkaido và bột cacao nhung mịn!';
+        }
+      } else if (ans1 === 'dark') {
+        if (ans3 === 'low' || ans2 === 'budget') {
+          matchedItem = dataSource.find(c => c.id === 'ghirardelli-intense-72');
+          matchReason = 'Socola đen 72% đậm đà danh tiếng từ San Francisco với mức giá cực kỳ tiết kiệm và chuẩn vị sành sỏi!';
+        } else if (ans2 === 'health') {
+          matchedItem = dataSource.find(c => c.id === 'lindt-excellence-85');
+          matchReason = 'Độ đắng 85% cacao thuần khiết Thụy Sĩ, cực ít đường và dồi dào chất chống oxy hóa bảo vệ sức khỏe tim mạch!';
+        } else if (ans2 === 'artisan' || ans3 === 'mid') {
+          matchedItem = dataSource.find(c => c.id === 'marou-daklak-70') || dataSource.find(c => c.id === 'marou-baria-76');
+          matchReason = 'Tuyệt tác Bean-to-bar Đắk Lắk được New York Times ca ngợi tinh tế và lôi cuốn nhất thế giới!';
+        } else if (ans3 === 'high' || ans2 === 'luxury') {
+          matchedItem = dataSource.find(c => c.id === 'valrhona-guanaja-70');
+          matchReason = 'Tuyệt tác Grand Cru danh giá nước Pháp, tiêu chuẩn vàng khắt khe cho giới đầu bếp Michelin thượng lưu!';
+        } else {
+          matchedItem = dataSource.find(c => c.id === 'marou-daklak-70');
+          matchReason = 'Hương vị cacao nguyên bản đa tầng phức hợp, niềm tự hào thương hiệu Bean-to-bar của Việt Nam!';
+        }
+      } else if (ans1 === 'praline') {
+        if (ans3 === 'high' || ans2 === 'luxury') {
+          matchedItem = dataSource.find(c => c.id === 'godiva-gold-collection');
+          matchReason = 'Hộp quà vàng hoàng gia Bỉ sang trọng bậc nhất thế giới với bộ sưu tập nhân praline hạt phỉ thơm lừng quý phái!';
+        } else if (ans3 === 'mid') {
+          matchedItem = dataSource.find(c => c.id === 'guylian-sea-shells');
+          matchReason = 'Biểu tượng socola vỏ sò trứ danh nước Bỉ với nhân praline hạt phỉ rang nướng thơm ngậy mượt mà!';
+        } else {
+          matchedItem = dataSource.find(c => c.id === 'ferrero-rocher-gold');
+          matchReason = 'Cấu trúc 4 tầng giòn rụm bọc hạt phỉ nướng nguyên hạt và kem chocolate hạt dẻ Nutella béo bùi chuẩn gu!';
+        }
       } else if (ans1 === 'milk') {
-        matchedItem = CHOCOLATE_DATA.find(c => c.id === 'tonys-caramel-sea-salt') || CHOCOLATE_DATA[4];
-        matchReason = 'Sự hòa quyện bùng nổ giữa muối biển nổ giòn, kẹo toffee caramel dẻo và socola sữa siêu dày!';
+        if (ans3 === 'low' || ans2 === 'budget') {
+          matchedItem = dataSource.find(c => c.id === 'toblerone-swiss-milk');
+          matchReason = 'Huyền thoại socola sữa Thụy Sĩ đỉnh núi Matterhorn với hạnh nhân ngào đường giòn tan siêu cuốn và giá cực hời!';
+        } else {
+          matchedItem = dataSource.find(c => c.id === 'tonys-caramel-sea-salt');
+          matchReason = 'Sự hòa quyện bùng nổ giữa muối biển nổ giòn, kẹo toffee caramel dẻo thơm và thanh socola sữa siêu dày đậm vị!';
+        }
+      } else if (ans2 === 'luxury' || ans3 === 'high') {
+        matchedItem = dataSource.find(c => c.id === 'godiva-gold-collection');
+        matchReason = 'Hộp quà vàng hoàng gia Bỉ sang trọng quý phái, lựa chọn đẳng cấp không thể bỏ lỡ!';
+      } else {
+        matchedItem = dataSource.find(c => c.productType === 'chocolate') || dataSource[0];
+        matchReason = 'Lựa chọn tiêu biểu được đông đảo người sành ăn yêu thích và đánh giá xuất sắc nhất!';
       }
+
+      if (!matchedItem) {
+        matchedItem = dataSource.find(c => c.productType === 'chocolate') || dataSource[0] || {
+          id: 'marou-daklak-70',
+          name: 'Marou Đắk Lắk 70% Single Origin',
+          brand: 'Marou Faiseurs de Chocolat',
+          origin: 'Việt Nam 🇻🇳',
+          price: 135000,
+          cocoa: 70,
+          badge: '🏆 Top 1 Bean-to-Bar Việt Nam',
+          image: 'assets/images/marou_daklak.jpg'
+        };
+      }
+
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
 
       elements.quizQuestionContainer.innerHTML = `
         <div style="padding: 10px 0;">
@@ -1414,7 +1548,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">${matchReason}</p>
           
           <div style="background: var(--bg-surface-elevated); border: 1px solid var(--gold-primary); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; gap: 20px; text-align: left; margin-bottom: 24px;">
-            <img src="${matchedItem.image}" alt="${matchedItem.name}" style="width: 90px; height: 90px; object-fit: cover; border-radius: var(--radius-sm);">
+            <img src="${matchedItem.image}" alt="${matchedItem.name}" style="width: 90px; height: 90px; object-fit: cover; border-radius: var(--radius-sm);" onerror="this.onerror=null; this.src='assets/images/placeholder.jpg';">
             <div>
               <div style="color: var(--gold-light); font-weight: 700;">${matchedItem.badge}</div>
               <div style="font-size: 0.85rem; color: var(--text-muted); margin: 4px 0;">${matchedItem.origin} • ${matchedItem.cocoa}% Cacao</div>
@@ -1503,6 +1637,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elements.clearSearchBtn) elements.clearSearchBtn.style.display = 'none';
     if (elements.sortSelect) elements.sortSelect.value = 'rating';
     if (elements.cocoaFilterSelect) elements.cocoaFilterSelect.value = 'all';
+    if (elements.priceFilterSelect) elements.priceFilterSelect.value = 'all';
     renderCategoryPills();
     renderChocolates();
     showToast('Đã đặt lại tất cả bộ lọc về mặc định.');

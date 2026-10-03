@@ -3,7 +3,8 @@
  * Dữ liệu chi tiết về các dòng socola ngon nhất và đáng mua nhất thế giới & Việt Nam.
  */
 
-const CHOCOLATE_DATA = [
+// Biến toàn cục chứa dữ liệu 20 sản phẩm socola & kẹo thượng hạng
+var CHOCOLATE_DATA = [
   {
     id: "marou-daklak-70",
     productType: "chocolate",
@@ -1267,3 +1268,14 @@ const AUTHENTICITY_CASES_DATA = [
     proTip: "Hộp thiếc chính hãng Cavendish & Harvey được dập nổi hoa văn quả vàng kim sắc sảo, có niêm phong màng nhôm vàng sáng bóng bảo vệ độ giòn tươi của kẹo."
   }
 ];
+
+// Gán vào window để các tệp script khác dễ dàng truy cập đồng bộ
+if (typeof window !== 'undefined') {
+  window.CHOCOLATE_DATA = CHOCOLATE_DATA;
+  window.STATS_DATA = STATS_DATA;
+  window.TASTE_QUIZ_QUESTIONS = TASTE_QUIZ_QUESTIONS;
+  window.CANDY_QUIZ_QUESTIONS = CANDY_QUIZ_QUESTIONS;
+  window.EATING_STYLES_DATA = EATING_STYLES_DATA;
+  window.AUTHENTICITY_CASES_DATA = AUTHENTICITY_CASES_DATA;
+}
+

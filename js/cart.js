@@ -36,9 +36,9 @@ function addToCart(productId, quantity = 1, redirectCheckout = false, allowGuest
   }
 
   // Tìm thông tin sản phẩm trong dữ liệu
-  const product = typeof CHOCOLATE_DATA !== 'undefined' 
-    ? CHOCOLATE_DATA.find(p => p.id === productId) 
-    : null;
+  const product = (typeof window !== 'undefined' && Array.isArray(window.CHOCOLATE_DATA))
+    ? window.CHOCOLATE_DATA.find(p => p.id === productId)
+    : (typeof CHOCOLATE_DATA !== 'undefined' ? CHOCOLATE_DATA.find(p => p.id === productId) : null);
 
   if (!product) {
     return { success: false, reason: 'product_not_found' };
@@ -133,13 +133,27 @@ function getCartSummary() {
   };
 }
 
-// Lưu đơn hàng vào danh sách đơn hàng giả lập
-function saveOrder(orderData) {
+// Lưu đơn hàng vào kho Supabase và lưu bản sao phòng ngừa vào localStorage
+function saveOrder(orderData, syncSupabase = true) {
   try {
     const existingRaw = localStorage.getItem(ORDERS_STORAGE_KEY);
     const orders = existingRaw ? JSON.parse(existingRaw) : [];
-    orders.unshift(orderData);
+    const orderId = orderData.orderId || orderData.id;
+    const idx = orders.findIndex(o => (o.orderId || o.id) === orderId);
+    if (idx > -1) {
+      orders[idx] = orderData;
+    } else {
+      orders.unshift(orderData);
+    }
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+
+    // Đồng bộ trực tiếp lên kho Supabase (bảng orders) nếu được yêu cầu
+    if (syncSupabase && typeof saveOrderToSupabase === 'function') {
+      saveOrderToSupabase(orderData).catch(err => {
+        console.warn('Lỗi lưu đơn hàng vào Supabase:', err);
+      });
+    }
+
     return true;
   } catch (e) {
     console.error('Lỗi khi lưu đơn hàng:', e);

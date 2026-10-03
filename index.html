@@ -235,46 +235,48 @@
     <!-- ========================================================================
          TASTE & CANDY QUIZ HUB
          ======================================================================== -->
-    <section class="container" id="quiz-section">
-      <div class="section-header" style="margin-bottom: 24px; text-align: center;">
-        <span class="section-badge">GỢI Ý THÔNG MINH CÁ NHÂN HÓA</span>
-        <h2 class="section-title">Trắc Nghiệm Tìm Món Ngon "Chân Ái" Của Riêng Bạn</h2>
-        <p class="section-subtitle">Chỉ mất 15 giây với 3 câu hỏi nhanh, hệ thống sẽ đề xuất ngay loại socola hoặc kẹo ngon nhất chuẩn gu của bạn!</p>
-      </div>
-
-      <div class="quiz-hub-grid">
-        <!-- Card 1: Chocolate Quiz -->
-        <div class="quiz-card quiz-card-choco">
-          <div class="quiz-card-header">
-            <span class="quiz-card-icon">🍫</span>
-            <span class="quiz-card-tag">DÀNH CHO TÍN ĐỒ SOCOLA</span>
-          </div>
-          <h3>Trắc Nghiệm Tìm Socola Hợp Gu</h3>
-          <p>Khám phá loại socola đen nguyên bản, socola tươi Nama tan chảy hay praline hạt phỉ hoàng gia sinh ra để dành cho bạn.</p>
-          <ul class="quiz-card-features">
-            <li>✓ Phân tích gu đắng, ngọt & độ tan chảy</li>
-            <li>✓ Đề xuất theo ngân sách & dịp thưởng thức</li>
-          </ul>
-          <button class="btn-primary" id="startQuizBtn">
-            <span>🎯 Bắt Đầu Trắc Nghiệm Socola (15s)</span>
-          </button>
+    <section class="quiz-section-wrap" id="quiz-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">GỢI Ý THÔNG MINH CÁ NHÂN HÓA</span>
+          <h2 class="section-title">Trắc Nghiệm Tìm Món Ngon "Chân Ái" Của Riêng Bạn</h2>
+          <p class="section-subtitle">Chỉ mất 15 giây với 3 câu hỏi nhanh, hệ thống sẽ đề xuất ngay loại socola hoặc kẹo ngon nhất chuẩn gu của bạn!</p>
         </div>
 
-        <!-- Card 2: Candy Quiz -->
-        <div class="quiz-card quiz-card-candy">
-          <div class="quiz-card-header">
-            <span class="quiz-card-icon">🍬</span>
-            <span class="quiz-card-tag candy-tag">DÀNH CHO TÍN ĐỒ KẸO NGON</span>
+        <div class="quiz-hub-grid">
+          <!-- Card 1: Chocolate Quiz -->
+          <div class="quiz-card quiz-card-choco">
+            <div class="quiz-card-header">
+              <span class="quiz-card-icon">🍫</span>
+              <span class="quiz-card-tag">DÀNH CHO TÍN ĐỒ SOCOLA</span>
+            </div>
+            <h3>Trắc Nghiệm Tìm Socola Hợp Gu</h3>
+            <p>Khám phá loại socola đen nguyên bản, socola tươi Nama tan chảy hay praline hạt phỉ hoàng gia sinh ra để dành cho bạn.</p>
+            <ul class="quiz-card-features">
+              <li>✓ Phân tích gu đắng, ngọt & độ tan chảy</li>
+              <li>✓ Đề xuất theo ngân sách & dịp thưởng thức</li>
+            </ul>
+            <button class="btn-primary" id="startQuizBtn">
+              <span>🎯 Bắt Đầu Trắc Nghiệm Socola (15s)</span>
+            </button>
           </div>
-          <h3>Trắc Nghiệm Chọn Loại Kẹo Phù Hợp</h3>
-          <p>Tìm xem bạn thuộc gu kẹo dẻo gấu Haribo, kẹo bơ caramel béo ngậy, kẹo ngậm thảo mộc Alps hay kẹo dừa dân dã!</p>
-          <ul class="quiz-card-features">
-            <li>✓ Phân tích cảm giác nhai: dẻo dai, ngậm tan hay giòn rụm</li>
-            <li>✓ Đề xuất theo hoàn cảnh: ăn vặt, dịu họng, để xe ô tô hay uống trà</li>
-          </ul>
-          <button class="btn-candy-primary" id="startCandyQuizBtn">
-            <span>🍬 Bắt Đầu Trắc Nghiệm Kẹo (15s)</span>
-          </button>
+
+          <!-- Card 2: Candy Quiz -->
+          <div class="quiz-card quiz-card-candy">
+            <div class="quiz-card-header">
+              <span class="quiz-card-icon">🍬</span>
+              <span class="quiz-card-tag candy-tag">DÀNH CHO TÍN ĐỒ KẸO NGON</span>
+            </div>
+            <h3>Trắc Nghiệm Chọn Loại Kẹo Phù Hợp</h3>
+            <p>Tìm xem bạn thuộc gu kẹo dẻo gấu Haribo, kẹo bơ caramel béo ngậy, kẹo ngậm thảo mộc Alps hay kẹo dừa dân dã!</p>
+            <ul class="quiz-card-features">
+              <li>✓ Phân tích cảm giác nhai: dẻo dai, ngậm tan hay giòn rụm</li>
+              <li>✓ Đề xuất theo hoàn cảnh: ăn vặt, dịu họng, để xe ô tô hay uống trà</li>
+            </ul>
+            <button class="btn-candy-primary" id="startCandyQuizBtn">
+              <span>🍬 Bắt Đầu Trắc Nghiệm Kẹo (15s)</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -912,16 +914,18 @@
     </div>
   </div>
 
+  <!-- Anchor target for buy-guide -->
+  <div id="buy-guide" style="position: absolute; visibility: hidden;"></div>
   <!-- Trusted Buying Directory Modal (Nơi Mua Uy Tín) -->
   <div class="modal-overlay" id="buyGuideModal" role="dialog" aria-modal="true">
     <div class="modal-card buy-guide-modal-card">
       <button class="modal-close-btn" aria-label="Đóng cửa sổ">✕</button>
       
-      <div class="section-header" style="margin-bottom: 24px; text-align: left;">
-        <span class="section-badge" style="background: rgba(212, 175, 55, 0.15); color: var(--gold-light);">🛒 HƯỚNG DẪN MUA HÀNG CHÍNH HÃNG</span>
-        <h3 style="font-size: 1.8rem; margin-top: 6px;">Địa Chỉ & Kênh Mua Socola / Kẹo Uy Tín</h3>
-        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 6px;">
-          Tổng hợp các kênh phân phối chính ngạch, chuỗi showroom cao cấp và sàn thương mại điện tử đáng tin cậy nhất tại Việt Nam.
+      <div class="modal-header-block">
+        <span class="section-badge">🛒 TIÊU CHUẨN THẨM ĐỊNH & LỰA CHỌN</span>
+        <h3 class="modal-main-title">Kênh Trải Nghiệm & Lựa Chọn Socola / Kẹo Đạt Chuẩn</h3>
+        <p class="modal-sub-desc">
+          Tổng hợp các tiêu chí bảo quản nhiệt độ, quy chuẩn showroom thủ công và kiểm định an toàn thực phẩm đáng tin cậy.
         </p>
       </div>
 
@@ -1071,6 +1075,8 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/cart.js"></script>
