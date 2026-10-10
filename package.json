@@ -2,9 +2,8 @@
   "name": "socola-chocorank",
   "version": "1.0.0",
   "description": "ChocoRank - Nền tảng thống kê & đánh giá socola và kẹo thượng hạng",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node local-server.js"
   },
   "keywords": [
     "chocolate",

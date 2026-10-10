@@ -13,6 +13,7 @@ ChocoRank là nền tảng thống kê, đánh giá và bảng xếp hạng các
 ## 🛠️ Cài Đặt & Chạy Thử
 Chạy máy chủ cục bộ bằng Node.js thuần (không cần cài thêm dependency):
 ```bash
-node server.js
+npm start
+# hoặc: node local-server.js
 ```
 Truy cập trình duyệt tại: `http://localhost:3000/`
